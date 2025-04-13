@@ -62,7 +62,7 @@ export default function HomePage() {
         .neon-text {
           color: #e600ff;
           text-shadow: 0 0 5px #0ff, 0 0 10px #0ff, 0 0 20px #0ff, 0 0 40px #e600ff,
-            0 0 80px #e600ff, 0 0 90px #e600ff, 0 0 100px #e600ff;
+            0 0 80pxrgba(230, 0, 255, 0.71), 0 0 90px #e600ff, 0 0 100px #e600ff;
         }
       `}</style>
     </div>
