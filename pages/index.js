@@ -1,115 +1,97 @@
-import Image from "next/image";
-import { Geist, Geist_Mono } from "next/font/google";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+import { useEffect, useState } from "react";
+import Link from "next/link";
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const neonSpineOdds = {
+  "Spark": 5.0,
+  "GlitchFang": 8.38,
+  "Venoma": 8.65,
+  "Eclipse.9": 5.63,
+  "Nova-13": 4.0,
+  "Solstice": 6.91,
+  "Zosi": 6.86,
+  "Blizzard.EXE": 6.42,
+  "ScrapDrift": 9.96,
+  "Razorbyte": 3.5,
+  "Aether-X": 7.57,
+  "Ignis Vyre": 6.59
+};
 
-export default function Home() {
+export default function PunkRacerzApp() {
+  const [walletConnected, setWalletConnected] = useState(false);
+  const [walletAddress, setWalletAddress] = useState(null);
+  const [punkBalance, setPunkBalance] = useState(null);
+  const [weatherPreview, setWeatherPreview] = useState([]);
+  const [interactions, setInteractions] = useState([]);
+
+  const weatherOptions = [
+    "Super Snow", "Rabbit Rain", "Smelting Sunshine",
+    "Hazardous Heat", "Cursed Clouds", "Acid Attacks", "Fire Fog"
+  ];
+
+  const weatherEffects = {
+    "Super Snow": { boost: "Blizzard.EXE", drop: "Ignis Vyre", synopsis: "Snow boosts Blizzard.EXE's systems, but freezes out Ignis Vyre." },
+    "Rabbit Rain": { boost: "Zosi", drop: "Solstice", synopsis: "Rain empowers Zosi’s hydro-chassis but slows sun-powered Solstice." },
+    "Smelting Sunshine": { boost: "Solstice", drop: "Eclipse.9", synopsis: "Solar power boosts Solstice but disrupts Eclipse.9’s stealth." },
+    "Hazardous Heat": { boost: "Ignis Vyre", drop: "Blizzard.EXE", synopsis: "Ignis thrives in heat while Blizzard.EXE's systems overheat." },
+    "Cursed Clouds": { boost: "Eclipse.9", drop: "Nova-13", synopsis: "Dark skies give Eclipse.9 an edge, clouding Nova-13’s sensors." },
+    "Acid Attacks": { boost: "Venoma", drop: "ScrapDrift", synopsis: "Toxic air fuels Venoma but corrodes ScrapDrift’s components." },
+    "Fire Fog": { boost: "Aether-X", drop: "Nova-13", synopsis: "Aether-X vanishes in fog; Nova-13 struggles with visibility." }
+  };
+
+  useEffect(() => {
+    const shuffled = [...weatherOptions].sort(() => 0.5 - Math.random());
+    const forecast = shuffled.slice(0, 3);
+    setWeatherPreview(forecast);
+
+    const weatherBoost = weatherEffects[forecast[0]];
+    const sampleInteractions = [
+      { text: `Weather Boost: ${weatherBoost.boost} +7%, ${weatherBoost.drop} -5%` },
+      { text: "Spark pranks GlitchFang with an EMP pie. Spark +5%, GlitchFang -5%" },
+      { text: "Venoma releases nano-venom in pit lane. Venoma +4%, others -1%" },
+      { text: "Solstice absorbs solar energy. Solstice +3%, Zosi -3%" }
+    ];
+    setInteractions(sampleInteractions);
+  }, []);
+
   return (
-    <div
-      className={`${geistSans.className} ${geistMono.className} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              pages/index.js
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="p-4 text-white bg-black min-h-screen">
+      <header className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-wide">PUNKRACERZ</h1>
+          {walletConnected && (
+            <p className="text-xs text-zinc-400">Wallet: {walletAddress} | $PUNK: {punkBalance}</p>
+          )}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
+        <button
+          onClick={() => alert('Connect Wallet logic goes here')}
+          className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded-xl shadow"
         >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+          {walletConnected ? "Wallet Connected" : "Connect Wallet"}
+        </button>
+      </header>
+
+      <section className="bg-zinc-900 p-6 rounded-2xl shadow-xl mb-6">
+        <h2 className="text-xl font-semibold mb-2">Forecast Preview</h2>
+        <ul className="text-zinc-300 list-disc ml-5">
+          {weatherPreview.map((type, idx) => (
+            <li key={idx}>
+              <span className="text-emerald-300 font-semibold">{type}</span>: {weatherEffects[type].synopsis}
+            </li>
+          ))}
+        </ul>
+        <p className="mt-2 text-xs text-zinc-500 italic">One of these will shape the track on race day.</p>
+        <Link href="/weather-info" className="text-indigo-400 underline mt-2 inline-block">Full Weather Guide →</Link>
+      </section>
+
+      <section className="bg-zinc-900 p-6 rounded-2xl shadow-xl mb-6">
+        <h2 className="text-xl font-semibold mb-2">Racer Interactions</h2>
+        <ul className="text-sm space-y-1">
+          {interactions.map((item, idx) => (
+            <li key={idx} className="text-zinc-300">• {item.text}</li>
+          ))}
+        </ul>
+      </section>
     </div>
   );
 }
