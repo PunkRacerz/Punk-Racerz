@@ -59,4 +59,35 @@ export default function HomePage() {
           background: linear-gradient(to top, #ff00cc, #9900ff);
           -webkit-background-clip: text;
           -webkit-text-fill-color: transparent;
-          font
+          font-family: Impact, Charcoal, fantasy;
+          text-shadow: 0 0 5px #ff00cc, 0 0 10px #9900ff, 0 0 20px #ff00cc;
+        }
+
+        @keyframes glitch-once {
+          0% {
+            transform: translate(0px);
+          }
+          20% {
+            transform: translate(-2px, 2px);
+          }
+          40% {
+            transform: translate(2px, -2px);
+          }
+          60% {
+            transform: translate(-1px, 1px);
+          }
+          80% {
+            transform: translate(1px, -1px);
+          }
+          100% {
+            transform: translate(0px);
+          }
+        }
+
+        .animate-glitch-once {
+          animation: glitch-once 0.4s ease-in-out;
+        }
+      `}</style>
+    </div>
+  );
+}
