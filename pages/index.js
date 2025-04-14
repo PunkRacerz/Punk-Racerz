@@ -83,16 +83,15 @@ export default function HomePage() {
       {/* Racer Flip Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
         {racers.map((racer, index) => (
-          <div key={index} className="relative w-full h-[460px] perspective">
-            <div className="relative w-full h-full transition-transform duration-700 transform-style preserve-3d hover:rotate-y-180">
+          <div key={index} className="relative w-full max-w-[280px] h-[400px] mx-auto perspective">
+            <div className="relative w-full h-full transition-transform duration-700 ease-in-out transform-style preserve-3d hover:rotate-y-180">
               {/* Front */}
               <div className="absolute w-full h-full backface-hidden rounded-xl shadow-lg overflow-hidden">
                 <Image
                   src={racer.image}
                   alt={racer.name}
-                  width={300}
-                  height={450}
-                  className="rounded-xl w-full h-full object-cover"
+                  fill
+                  className="object-cover rounded-xl"
                 />
                 <div className="absolute bottom-0 w-full bg-black bg-opacity-60 py-2 text-center font-bold text-lg">
                   {racer.name}
