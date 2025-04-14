@@ -33,8 +33,8 @@ const racers = [
     backstory: `Chaotic Neutral\nGravel/junkyard mastery\nStrengths: Durable and self-repairing\nWeaknesses: Slow on smooth roads\nPersonality: Punk-rock glitch bot`,
   },
   {
-    name: 'SilkRaid',
-    image: '/racers/silkraid.png',
+    name: 'Zosi',
+    image: '/racers/zosi.png',
     backstory: `Neutral Evil\nRain master\nStrengths: Hydro-adaptive\nWeaknesses: Overheats in dry zones\nPersonality: Elegant and deceitful`,
   },
   {
@@ -54,7 +54,7 @@ const racers = [
   },
   {
     name: 'Spark',
-    image: '/racers/sparkhavok.png',
+    image: '/racers/spark.png',
     backstory: `Chaotic Neutral\nThrives in chaos\nStrengths: Acceleration in storms\nWeaknesses: Fails on tight tracks\nPersonality: Speed-hungry prankster`,
   },
   {
