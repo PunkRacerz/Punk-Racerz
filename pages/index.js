@@ -1,66 +1,79 @@
 import Image from 'next/image';
 import { useState } from 'react';
+import Link from 'next/link';
 
 const racers = [
   {
     name: 'Nova-13',
     image: '/racers/nova-13.png',
     backstory: `Lawful Good\nPrecision on dry, urban tracks\nStrengths: Flawless cornering, optimized for cityscapes\nWeaknesses: Struggles in off-road and extreme weather\nPersonality: Noble, methodical, and calculated—races to uphold cybernetic honor`,
+    odds: 5.2,
   },
   {
     name: 'GlitchFang',
     image: '/racers/glitchfang.png',
     backstory: `Chaotic Evil\nThrives in electrical storms\nStrengths: Unpredictable and aggressive\nWeaknesses: Overheats, malfunctions on clean circuits\nPersonality: Sadistic hacker AI feeding on system chaos`,
+    odds: 4.8,
   },
   {
     name: 'Solstice',
     image: '/racers/solstice.png',
     backstory: `Neutral Good\nDesert and sunlight enhanced\nStrengths: Accelerates under sunlight\nWeaknesses: Weak in rain/night\nPersonality: Peaceful, believes in purity of speed`,
+    odds: 6.3,
   },
   {
     name: 'RazorByte',
     image: '/racers/razorbyte.png',
     backstory: `Lawful Evil\nNeon city specialist\nStrengths: Ruthless cornering\nWeaknesses: Poor in nature\nPersonality: Cold, corporate assassin AI`,
+    odds: 4.2,
   },
   {
     name: 'Aether-X',
     image: '/racers/aether-x.png',
     backstory: `True Neutral\nHigh-altitude, fog specialty\nStrengths: Spatial awareness\nWeaknesses: EMI vulnerable\nPersonality: Mysterious, logical`,
+    odds: 9.1,
   },
   {
     name: 'ScrapDrift',
     image: '/racers/scrapdrift.png',
     backstory: `Chaotic Neutral\nGravel/junkyard mastery\nStrengths: Durable and self-repairing\nWeaknesses: Slow on smooth roads\nPersonality: Punk-rock glitch bot`,
+    odds: 7.4,
   },
   {
     name: 'Zosi',
     image: '/racers/zosi.png',
     backstory: `Neutral Evil\nRain master\nStrengths: Hydro-adaptive\nWeaknesses: Overheats in dry zones\nPersonality: Elegant and deceitful`,
+    odds: 5.9,
   },
   {
     name: 'Ignis Vyre',
     image: '/racers/ignis-vyre.png',
     backstory: `Chaotic Good\nVolcanic circuit pro\nStrengths: Fireproof turbo systems\nWeaknesses: Fails in cold\nPersonality: Flamboyant rebel`,
+    odds: 6.0,
   },
   {
     name: 'Blizzard.EXE',
     image: '/racers/blizzard.png',
     backstory: `Lawful Neutral\nIcy terrain specialist\nStrengths: Adaptive systems\nWeaknesses: Fails in heat\nPersonality: Cold, calculating`,
+    odds: 3.7,
   },
   {
     name: 'Venoma',
     image: '/racers/venoma.png',
     backstory: `Neutral Evil\nToxic waste expert\nStrengths: Thrives in pollution\nWeaknesses: Weak in sterile zones\nPersonality: Seductive, saboteur`,
+    odds: 8.5,
   },
   {
     name: 'Spark',
     image: '/racers/spark.png',
     backstory: `Chaotic Neutral\nThrives in chaos\nStrengths: Acceleration in storms\nWeaknesses: Fails on tight tracks\nPersonality: Speed-hungry prankster`,
+    odds: 5.6,
   },
   {
     name: 'Eclipse.9',
     image: '/racers/eclipse9.png',
     backstory: `True Evil\nDark circuit hunter\nStrengths: Stealth in darkness\nWeaknesses: Daylight disorients\nPersonality: Silent eliminator`,
+    odds: 3.2,
   },
 ];
 
@@ -80,10 +93,10 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Racer Flip Cards */}
+      {/* Racer Flip Cards with Odds */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
         {racers.map((racer, index) => (
-          <div key={index} className="relative w-full max-w-[280px] h-[400px] mx-auto perspective">
+          <div key={index} className="relative w-full max-w-[280px] h-[440px] mx-auto perspective">
             <div className="relative w-full h-full transition-transform duration-700 ease-in-out transform-style preserve-3d hover:rotate-y-180">
               {/* Front */}
               <div className="absolute w-full h-full backface-hidden rounded-xl shadow-lg overflow-hidden">
@@ -93,6 +106,13 @@ export default function HomePage() {
                   fill
                   className="object-cover rounded-xl"
                 />
+                <div className="absolute bottom-12 w-full px-2">
+                  <Link href={`/bet/${racer.name.toLowerCase()}`}>
+                    <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-md text-sm font-semibold shadow-md">
+                      Bet @ {racer.odds}x
+                    </button>
+                  </Link>
+                </div>
                 <div className="absolute bottom-0 w-full bg-black bg-opacity-60 py-2 text-center font-bold text-lg">
                   {racer.name}
                 </div>
