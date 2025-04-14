@@ -1,5 +1,12 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { useMemo } from 'react';
+import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
+import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
+import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import '@solana/wallet-adapter-react-ui/styles.css';
+
+require('@solana/wallet-adapter-react-ui/styles.css');
 
 const racers = [
   {
