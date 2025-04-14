@@ -73,8 +73,8 @@ now racing to prove perfection pays dividends.
     odds: 9.1,
     backstory: `🌀 AETHER-X
 
-Nobody knows who made AETHER-X. There are no blueprints. No
-source code. Only rumours of a high-altitude drone that
+Nobody knows who made AETHER-X. There are no blueprints. 
+No source code. Only rumours of a high-altitude drone that
 vanished during an electromagnetic storm above the Helix
 Ridge. Months later, this silent figure emerged from the
 mountain fog, racing with uncanny awareness of terrain,
