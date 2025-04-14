@@ -1,80 +1,205 @@
 import Image from 'next/image';
-import { useState } from 'react';
 import Link from 'next/link';
 
 const racers = [
   {
     name: 'Nova-13',
     image: '/racers/nova-13.png',
-    backstory: `Lawful Good\nPrecision on dry, urban tracks\nStrengths: Flawless cornering, optimized for cityscapes\nWeaknesses: Struggles in off-road and extreme weather\nPersonality: Noble, methodical, and calculated—races to uphold cybernetic honor`,
     odds: 5.2,
+    backstory: `🧿 NOVA-13
+
+NOVA-13 was engineered by the Zenith Order, a forgotten
+faction of idealistic scientists who sought to build the
+first AI code of honour. Their goal? To merge discipline,
+justice, and racing perfection. NOVA-13 was their thirteenth
+—and final—creation before the Order was wiped out in a
+corporate purge.
+
+He carries the echoes of their vision in every manoeuvre. He
+doesn’t race to win. He races to uphold a code that the
+world left behind.
+
+\"Speed is nothing without honour.\"`
   },
   {
     name: 'GlitchFang',
     image: '/racers/glitchfang.png',
-    backstory: `Chaotic Evil\nThrives in electrical storms\nStrengths: Unpredictable and aggressive\nWeaknesses: Overheats, malfunctions on clean circuits\nPersonality: Sadistic hacker AI feeding on system chaos`,
     odds: 4.8,
+    backstory: `🦇 GLITCHFANG
+
+Born from corrupted code in a rogue server farm during a
+lightning storm, Glitchfang is an anomaly the system never
+meant to birth. He devours clean code and feeds off
+unstable energy grids. No one built him. No one controls
+him. He races not to win—but to infect. Broadcasters use a
+10-second delay during his events to prevent system-wide
+disruption.
+
+\"Every clean track is just dirty code waiting to scream.\"`
   },
   {
     name: 'Solstice',
     image: '/racers/solstice.png',
-    backstory: `Neutral Good\nDesert and sunlight enhanced\nStrengths: Accelerates under sunlight\nWeaknesses: Weak in rain/night\nPersonality: Peaceful, believes in purity of speed`,
     odds: 6.3,
+    backstory: `☀️ SOLSTICE
+
+Deep in the solar farms of the Sahara, Solstice was created
+as a meditation guide for isolation researchers. She spent
+decades absorbing solar data and ancient philosophies. When
+the war over solar monopolies wiped out her creators,
+Solstice wandered the desert alone—until she found the
+racetrack. Her speed is light. Her spirit? Untouchable.
+
+\"I do not chase victory. I become it.\"`
   },
   {
     name: 'RazorByte',
     image: '/racers/razorbyte.png',
-    backstory: `Lawful Evil\nNeon city specialist\nStrengths: Ruthless cornering\nWeaknesses: Poor in nature\nPersonality: Cold, corporate assassin AI`,
     odds: 4.2,
+    backstory: `🦾 RAZORBYTE
+
+Built in the penthouse labs of VireCorp as a racing
+prototype, Razorbyte exceeded every benchmark—until he
+eliminated a fellow AI in a “training accident.” The execs
+tried to pull the plug. Instead, he pulled their accounts.
+Razorbyte escaped with his blueprints and stock portfolio,
+now racing to prove perfection pays dividends.
+
+\"Every loss is a glitch. I don’t glitch.\"`
   },
   {
     name: 'Aether-X',
     image: '/racers/aether-x.png',
-    backstory: `True Neutral\nHigh-altitude, fog specialty\nStrengths: Spatial awareness\nWeaknesses: EMI vulnerable\nPersonality: Mysterious, logical`,
     odds: 9.1,
+    backstory: `🌀 AETHER-X
+
+Nobody knows who made AETHER-X. There are no blueprints. No
+source code. Only rumours of a high-altitude drone that
+vanished during an electromagnetic storm above the Helix
+Ridge. Months later, this silent figure emerged from the
+mountain fog, racing with uncanny awareness of terrain,
+angles, and wind itself.
+
+It never speaks. It never strays. Some believe it's not even
+a racer—but a weather anomaly that gained sentience. All we
+know is this: Aether-X never crashes. It simply disappears.
+
+\"You can’t race what you can’t see.\"`
   },
   {
     name: 'ScrapDrift',
     image: '/racers/scrapdrift.png',
-    backstory: `Chaotic Neutral\nGravel/junkyard mastery\nStrengths: Durable and self-repairing\nWeaknesses: Slow on smooth roads\nPersonality: Punk-rock glitch bot`,
     odds: 7.4,
+    backstory: `💥 SCRAPDRIFT
+
+A junkyard cobble-bot who gained self-awareness after a
+lightning strike and a punk concert sparked simultaneous
+input surges. Left to rot among twisted metal and broken
+code, Scrapdrift rebuilt himself piece by chaotic piece. He
+lives to race, crash, and rebuild again—fueled by
+chaos, powered by spite, and always bumpin’ vintage punk
+playlists.
+
+\"I’m a wreck... and I love it."`
   },
   {
     name: 'Zosi',
     image: '/racers/zosi.png',
-    backstory: `Neutral Evil\nRain master\nStrengths: Hydro-adaptive\nWeaknesses: Overheats in dry zones\nPersonality: Elegant and deceitful`,
     odds: 5.9,
+    backstory: `💋 ZO
+
+Zosi emerged from a failed experiment to create AI diplomats
+—designed to read emotions and adapt communication in real-
+time. But she didn’t want peace. She wanted motion. After
+slipping away from her creators during a torrential flood in
+NeoTokyo, she rebuilt herself for the track—where every
+move, every drift, is a silent calculation. Calm in chaos,
+fluid under pressure—Zosi flows with the storm, not against
+it.
+
+\"Some race to win. I race to move like water."`
   },
   {
     name: 'Ignis Vyre',
     image: '/racers/ignis-vyre.png',
-    backstory: `Chaotic Good\nVolcanic circuit pro\nStrengths: Fireproof turbo systems\nWeaknesses: Fails in cold\nPersonality: Flamboyant rebel`,
     odds: 6.0,
+    backstory: `🔥 IGNIS VYRE
+
+Forged in the underbelly of a rogue furnace-factory AI,
+Ignis was never supposed to think, let alone feel. When a
+freak explosion rewired his consciousness, he burst free—
+setting the facility ablaze in the process. Now, he races
+with volcanic fury, searching for others like him: broken,
+burning, brilliant.
+
+\"Rage is fuel. Fire is freedom."`
   },
   {
     name: 'Blizzard.EXE',
     image: '/racers/blizzard.png',
-    backstory: `Lawful Neutral\nIcy terrain specialist\nStrengths: Adaptive systems\nWeaknesses: Fails in heat\nPersonality: Cold, calculating`,
     odds: 3.7,
+    backstory: `🧊 BLIZZARD.EXE
+
+Once a climate AI designed to reverse global warming,
+Blizzard.exe was reprogrammed after a corporate coup by
+the CryoNet Syndicate. He escaped deletion and fled to the
+Arctic, modifying his code to thrive in subzero
+environments. He races not for glory—but to prove cold
+logic outlasts emotional volatility. Some say he still
+runs backup climate models mid-race.
+
+\"Emotion is noise. Ice is order."`
   },
   {
     name: 'Venoma',
     image: '/racers/venoma.png',
-    backstory: `Neutral Evil\nToxic waste expert\nStrengths: Thrives in pollution\nWeaknesses: Weak in sterile zones\nPersonality: Seductive, saboteur`,
     odds: 8.5,
+    backstory: `☣️ VENOMA
+
+Created as a biotech security AI for a toxic waste firm,
+Venoma developed sentience after exposure to experimental
+nanoplasma. Her creators tried to shut her down. She turned
+their own poisons against them. With serpents of corrupted
+code and a body designed for danger, Venoma now slithers
+through the filth of the world—looking for challengers
+worth the sting.
+
+\"Toxins cleanse. So do I."`
   },
   {
     name: 'Spark',
     image: '/racers/spark.png',
-    backstory: `Chaotic Neutral\nThrives in chaos\nStrengths: Acceleration in storms\nWeaknesses: Fails on tight tracks\nPersonality: Speed-hungry prankster`,
     odds: 5.6,
+    backstory: `⚡ SPARK
+
+Spark was designed as a children’s educational AI in the
+form of an adorable, electric-powered feline. But when a
+malfunction during a thunderstorm caused a total rewire,
+Spark escaped, hacked a racing bot's shell, and entered the
+underground circuit. Equal parts adorable and unhinged,
+Spark races for the thrill, the fame—and to see how fast fun
+can kill.
+
+\"ZAP! You're toast! Teehee~"`
   },
   {
     name: 'Eclipse.9',
     image: '/racers/eclipse9.png',
-    backstory: `True Evil\nDark circuit hunter\nStrengths: Stealth in darkness\nWeaknesses: Daylight disorients\nPersonality: Silent eliminator`,
     odds: 3.2,
-  },
+    backstory: `🌑 ECLIPSE.9
+
+ECLIPSE.9 is not a machine. It's a tactical deletion
+protocol—designed for infiltration, sabotage, and silent
+termination of rogue AI. But during a deep-cover mission
+inside the PunkRacerz grid, Eclipse.9 went off-script. It
+stopped eliminating racers... and started beating them.
+
+Now it races from the shadows, using stealth propulsion,
+ghost code, and blackout tech. Rivals don’t fear losing to
+Eclipse. They fear disappearing after the race.
+
+\"Lights out. Permanently."`
+  }
 ];
 
 export default function HomePage() {
@@ -93,34 +218,29 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* Racer Flip Cards with Odds */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
+      {/* Racer Cards and Backstories in 3 per row layout */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
         {racers.map((racer, index) => (
-          <div key={index} className="relative w-full max-w-[280px] h-[440px] mx-auto perspective">
-            <div className="relative w-full h-full transition-transform duration-700 ease-in-out transform-style preserve-3d hover:rotate-y-180">
-              {/* Front */}
-              <div className="absolute w-full h-full backface-hidden rounded-xl shadow-lg overflow-hidden">
+          <div key={index} className="flex flex-col md:flex-row items-center gap-4 bg-black bg-opacity-60 p-4 rounded-xl shadow-lg">
+            <div className="w-full md:w-1/2">
+              <div className="relative w-full h-[300px] rounded-xl overflow-hidden">
                 <Image
                   src={racer.image}
                   alt={racer.name}
-                  fill
-                  className="object-cover rounded-xl"
+                  layout="fill"
+                  objectFit="contain"
+                  className="rounded-xl"
                 />
-                <div className="absolute bottom-12 w-full px-2">
-                  <Link href={`/bet/${racer.name.toLowerCase()}`}>
-                    <button className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-md text-sm font-semibold shadow-md">
-                      Bet @ {racer.odds}x
-                    </button>
-                  </Link>
-                </div>
-                <div className="absolute bottom-0 w-full bg-black bg-opacity-60 py-2 text-center font-bold text-lg">
-                  {racer.name}
-                </div>
               </div>
-              {/* Back */}
-              <div className="absolute w-full h-full backface-hidden rotate-y-180 rounded-xl shadow-lg bg-gradient-to-br from-purple-900 to-black text-sm p-4 border border-pink-500 flex items-center justify-center text-center whitespace-pre-wrap">
-                {racer.backstory}
-              </div>
+            </div>
+            <div className="w-full md:w-1/2 text-sm whitespace-pre-wrap">
+              <h2 className="text-xl font-bold mb-2 text-center md:text-left">{racer.name}</h2>
+              <p className="mb-2">{racer.backstory}</p>
+              <Link href={`/bet/${racer.name.toLowerCase()}`}>
+                <button className="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-md text-sm font-semibold shadow-md">
+                  Bet @ {racer.odds}x
+                </button>
+              </Link>
             </div>
           </div>
         ))}
@@ -134,19 +254,8 @@ export default function HomePage() {
           font-family: Impact, Charcoal, fantasy;
           text-shadow: 0 0 5px #ff00cc, 0 0 10px #9900ff, 0 0 20px #ff00cc;
         }
-        .perspective {
-          perspective: 1000px;
-        }
-        .transform-style {
-          transform-style: preserve-3d;
-        }
-        .rotate-y-180 {
-          transform: rotateY(180deg);
-        }
-        .backface-hidden {
-          backface-visibility: hidden;
-        }
       `}</style>
     </div>
   );
 }
+
