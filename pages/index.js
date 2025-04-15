@@ -1,12 +1,16 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
-import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui';
+import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import '@solana/wallet-adapter-react-ui/styles.css';
 
-require('@solana/wallet-adapter-react-ui/styles.css');
+const WalletMultiButton = dynamic(
+  () => import('@solana/wallet-adapter-react-ui').then(mod => mod.WalletMultiButton),
+  { ssr: false }
+);
 
 const racers = [
   {
@@ -20,12 +24,12 @@ const racers = [
     image: '/racers/glitchfang.png',
     odds: 4.8,
     backstory: `🦇 GLITCHFANG\n\nBorn from corrupted code in a rogue server farm during a lightning storm, Glitchfang is an anomaly the system never meant to birth. He devours clean code and feeds off unstable energy grids. No one built him. No one controls him. He races not to win—but to infect. Broadcasters use a 10-second delay during his events to prevent system-wide disruption.\n\n\"Every clean track is just dirty code waiting to scream.\"`
-  }
+  },
   {
     name: 'Solstice',
     image: '/racers/solstice.png',
     odds: 6.3,
-    backstory: `☀️ SOLSTIC
+    backstory: `☀️ SOLSTICE
 
 Deep in the solar farms of the Sahara, Solstice was created as a meditation guide for isolation researchers. She spent decades absorbing solar data and ancient philosophies. When the war over solar monopolies wiped out her creators, Solstice wandered the desert alone—until she found the racetrack. Her speed is light. Her spirit? Untouchable.
 
@@ -42,7 +46,7 @@ Built in the penthouse labs of VireCorp as a racing prototype, Razorbyte exceede
 \"Every loss is a glitch. I don’t glitch.\"`
   },
   {
-    name: 'Aether-X',
+    name: 'Aether -X',
     image: '/racers/aether-x.png',
     odds: 9.1,
     backstory: `🌀 AETHER-X
@@ -127,6 +131,19 @@ Now it races from the shadows, using stealth propulsion, ghost code, and blackou
   }
 ];
 
+function useRewardPunkTokens() {
+  const { connected, publicKey } = useWallet();
+  const [rewarded, setRewarded] = useState(false);
+
+  useEffect(() => {
+    if (connected && publicKey && !rewarded) {
+      console.log(`Rewarded 10 $PUNK to ${publicKey.toBase58()}`);
+      alert('You received 10 $PUNK tokens (valueless for now) just for connecting your wallet!');
+      setRewarded(true);
+    }
+  }, [connected, publicKey, rewarded]);
+}
+
 export default function HomePage() {
   const wallets = useMemo(() => [new PhantomWalletAdapter()], []);
 
@@ -134,59 +151,109 @@ export default function HomePage() {
     <ConnectionProvider endpoint="https://api.mainnet-beta.solana.com">
       <WalletProvider wallets={wallets} autoConnect>
         <WalletModalProvider>
-          <div
-            className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-8"
-            style={{ backgroundImage: "url('/background.png')" }}
-          >
-            {/* Header */}
-            <div className="flex justify-between items-start mb-10">
-              <h1 className="w-full text-center text-5xl md:text-7xl font-extrabold tracking-tight lightning-text">
-                PUNKRACERZ
-              </h1>
-              <div className="w-16 md:w-20">
-                <Image src="/logo.png" alt="PunkRacerz Logo" width={80} height={80} />
-              </div>
-            </div>
-
-            {/* Racer Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
-              {racers.map((racer, index) => (
-                <div
-                  key={index}
-                  className="flex flex-col md:flex-row items-center gap-4 bg-black bg-opacity-60 p-4 rounded-xl shadow-lg transform transition duration-300 hover:scale-105"
-                >
-                  <div className="w-full md:w-1/2">
-                    <div className="relative w-full h-[300px] rounded-xl overflow-hidden">
-                      <Image
-                        src={racer.image}
-                        alt={racer.name}
-                        layout="fill"
-                        objectFit="contain"
-                        className="rounded-xl"
-                      />
-                    </div>
-                    <p className="text-center mt-2 text-purple-300 font-bold">Odds: {racer.odds}x</p>
-                  </div>
-                  <div className="w-full md:w-1/2 text-sm whitespace-pre-wrap">
-                    <h2 className="text-xl font-bold mb-2 text-center md:text-left">{racer.name}</h2>
-                    <p className="mb-2">{racer.backstory}</p>
-                    <Link href={`/bet/${racer.name.toLowerCase()}`}>
-                      <button className="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-md text-sm font-semibold shadow-md">
-                        Bet Now
-                      </button>
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Connect Wallet Button */}
-            <div className="mt-10 text-center">
-              <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
-            </div>
-          </div>
+          <MainContent />
         </WalletModalProvider>
       </WalletProvider>
     </ConnectionProvider>
+  );
+}
+
+function MainContent() {
+  useRewardPunkTokens();
+  const [betPlaced, setBetPlaced] = useState(false);
+
+  const placeBet = () => {
+    setBetPlaced(true);
+    alert('Good luck you degenerate! Bet placed.');
+  };
+
+  return (
+    <div className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-8" style={{ backgroundImage: "url('/background.png')" }}>
+      <div className="absolute top-6 left-6 flex flex-col w-fit z-20">
+        <a href="/" className="panel-link rounded-t-md">🏁 Home</a>
+        <a href="/weekly-track-report" className="panel-link">📈 Weekly Report</a>
+        <a href="/weather-forecast" className="panel-link">⛈ Weather</a>
+        <a href="/interactions" className="panel-link">🤖 Interact</a>
+        <a href="/ceo-message" className="panel-link rounded-b-md">👑 CEO Message</a>
+      </div>
+
+      <div className="flex justify-between items-start mb-10">
+        <h1 className="w-full text-center text-4xl md:text-6xl font-extrabold tracking-tight arcade-text">
+          PUNKRACERZ
+        </h1>
+        <div className="w-16 md:w-20">
+          <Image src="/logo.png" alt="PunkRacerz Logo" width={80} height={80} />
+        </div>
+      </div>
+
+      {/* Racer Cards */}
+      <div id="racers" className="grid grid-cols-1 md:grid-cols-3 gap-10">
+        {racers.map((racer, index) => (
+          <div
+            key={index}
+            className="flex flex-col md:flex-row items-center gap-4 bg-black bg-opacity-60 p-4 rounded-xl shadow-lg transform transition duration-300 hover:scale-105"
+          >
+            <div className="w-full md:w-1/2">
+              <div className="relative w-full h-[300px] rounded-xl overflow-hidden">
+                <Image
+                  src={racer.image}
+                  alt={racer.name}
+                  layout="fill"
+                  objectFit="contain"
+                  className="rounded-xl"
+                />
+              </div>
+              <p className="text-center mt-2 text-purple-300 font-bold">Odds: {racer.odds}x</p>
+            </div>
+            <div className="w-full md:w-1/2 text-sm whitespace-pre-wrap">
+              <h2 className="text-xl font-bold mb-2 text-center md:text-left">{racer.name}</h2>
+              <p className="mb-2">{racer.backstory}</p>
+              <button onClick={placeBet} className="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-md text-sm font-semibold shadow-md">
+                Bet 10 $PUNK
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Connect Wallet Button */}
+      <div id="wallet" className="mt-10 text-center">
+        <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
+      </div>
+
+      {/* Social Bar */}
+      <div id="socials" className="mt-10 flex justify-center gap-10 items-center">
+        <a href="https://x.com/PnkRacerz" target="_blank" rel="noopener noreferrer">
+          <Image src="/x.png" alt="X link" width={40} height={40} />
+        </a>
+        <a href="https://github.com/PunkRacerz/Punk-Racerz" target="_blank" rel="noopener noreferrer">
+          <Image src="/github.png" alt="GitHub link" width={40} height={40} />
+        </a>
+      </div>
+
+      <style jsx>{`
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        .arcade-text {
+          font-family: 'Press Start 2P', monospace;
+          color: #00ffff;
+          text-shadow: 0 0 6px #0ff, 0 0 12px #f0f;
+        }
+        .panel-link {
+          display: block;
+          background: rgba(255, 255, 255, 0.05);
+          padding: 0.75rem 1.5rem;
+          border: 1px solid rgba(255, 255, 255, 0.1);
+          color: white;
+          font-family: 'Share Tech Mono', monospace;
+          font-weight: bold;
+          text-align: left;
+          transition: all 0.2s ease-in-out;
+        }
+        .panel-link:hover {
+          background: rgba(255, 255, 255, 0.12);
+          transform: translateX(4px);
+        }
+      `}</style>
+    </div>
   );
 }
