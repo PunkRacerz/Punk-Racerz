@@ -15,10 +15,10 @@ const WalletMultiButton = dynamic(
 
 const weatherEffects = {
   "Super Snow": {
-    "Blizzard.EXE": "+10%",
+    "Blizzard.EXE": "+15%",
     "Eclipse.9": "+5%",
-    "Ignis Vyre": "-10%",
-    "Solstice": "-5%",
+    "Ignis Vyre": "-15%",
+    "Solstice": "-10%",
     "Spark": "-5%",
     "GlitchFang": "-5%",
     "ScrapDrift": "0%",
@@ -44,7 +44,7 @@ const weatherEffects = {
   },
   "Fire Fog": {
     Spark: "0%",
-    "Ignis Vyre": "+10%",
+    "Ignis Vyre": "+15%",
     Solstice: "+5%",
     Zosi: "+5%",
     Venoma: "+5%",
@@ -52,9 +52,9 @@ const weatherEffects = {
     "GlitchFang": "-5%",
     "Eclipse.9": "-5%",
     "Razorbyte": "0%",
-    "Nova-13": "-5%",
+    "Nova-13": "-15%",
     ScrapDrift: "+5%",
-    "Aether-X": "+5%",
+    "Aether-X": "+10%",
   },
 };
 
@@ -66,7 +66,7 @@ const weatherAnimations = {
 
 export default function WeatherForecast() {
   return (
-    <div className="min-h-screen bg-black text-white font-sans px-6 py-8 relative overflow-hidden">
+    <div className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-8 relative overflow-hidden" style={{ backgroundImage: "url('/background.png')" }}>
       {/* Weather Particles */}
       {Object.entries(weatherAnimations).map(([weather, icon]) => (
         <div key={weather} className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -85,12 +85,13 @@ export default function WeatherForecast() {
         </div>
       ))}
 
-      <div className="absolute top-6 left-6 flex flex-col w-fit z-20">
+      <div className="fixed top-6 left-6 flex flex-col w-fit z-20">
         <a href="/" className="panel-link rounded-t-md">🏁 Home</a>
-        <a href="/weekly-track-report" className="panel-link">📈 Weekly Report</a>
         <a href="/weather-forecast" className="panel-link">⛈ Weather</a>
         <a href="/interactions" className="panel-link">🤖 Interact</a>
+        <a href="/wallet-page" className="panel-link">💳 Wallet</a>
         <a href="/ceo-message" className="panel-link rounded-b-md">👑 CEO Message</a>
+        <a href="/weekly-messages" className="panel-link rounded-b-md">📈 Weekly Messages</a>
       </div>
 
       <motion.div className="relative z-10"
@@ -104,7 +105,7 @@ export default function WeatherForecast() {
         {Object.entries(weatherEffects).map(([weather, racers]) => (
           <motion.div
             key={weather}
-            className="text-center p-8 rounded-3xl bg-black bg-opacity-50 backdrop-blur-xl shadow-2xl mx-auto max-w-3xl mb-20 border border-black transition-transform duration-300 hover:scale-[1.01]"
+            className="text-center p-8 rounded-3xl bg-transparent backdrop-blur-xl shadow-2xl mx-auto max-w-3xl mb-20 border border-white border-opacity-20 transition-transform duration-300 hover:scale-[1.01]"
             initial={{ opacity: 0, y: 40 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -112,17 +113,17 @@ export default function WeatherForecast() {
           >
             <Image src={`/${weather.toLowerCase().replace(/ /g, '-')}.png`} alt={weather} width={240} height={160} className="mx-auto rounded-xl border border-white border-opacity-10 shadow-lg" />
             <h2 className="text-4xl mt-6 font-extrabold tracking-wide text-white uppercase" style={{ fontFamily: 'Share Tech Mono, monospace' }}>{weather}</h2>
-            <p className="mt-4 text-base italic text-gray-300 max-w-xl mx-auto">
-              {weather === 'Super Snow' && 'The sky vomits snowman heads. Carrot noses everywhere. Visibility down, chaos up. Cold enough to make AI circuits tremble.'}
+            <p className="mt-4 text-base italic text-white max-w-xl mx-auto">
+              {weather === 'Super Snow' && 'The sky vomits snowman heads. Carrot noses everywhere. Blizzard.EXE must be "frustrated" again. Visibility down, chaos up. Cold enough to make AI circuits tremble.'}
               {weather === 'Rabbit Rain' && 'Rabbits fall from the sky. Not metaphorically—actual, cartoonish rabbits, soft and squeaky. No one knows why. No one can stop it. Some say GlitchFang wished for this in his sleep. Others blame Spark. The sky is just... full of bunnies.'}
-              {weather === 'Fire Fog' && 'Hot, thick smoke mixed with firestorms and glowing ash. Breathing not advised. Seeing optional. Cook your steak on the hood.'}
+              {weather === 'Fire Fog' && 'ScrapDrift has been smoking his "herbs" again. Hot, thick smoke mixed with firestorms and glowing ash. Breathing not advised. Seeing optional. Cook your steak on the hood.'}
             </p>
             <h3 className="text-2xl font-bold mt-10 mb-4 text-white tracking-tight">🎲 To Boost or Not to Boost?</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm text-white">
               {Object.entries(racers).map(([racer, effect]) => (
-                <div key={racer} className="flex justify-between px-4 py-3 bg-black bg-opacity-70 rounded-md border border-black hover:bg-opacity-90">
-                  <span className="font-semibold tracking-wide">{racer}</span>
-                  <span>{effect}</span>
+                <div key={racer} className="flex justify-between px-4 py-3 bg-transparent backdrop-blur-md rounded-md border border-white border-opacity-20 hover:bg-white hover:bg-opacity-5">
+                  <span className="font-semibold tracking-wide text-white">{racer}</span>
+                  <span className="text-white">{effect}</span>
                 </div>
               ))}
             </div>

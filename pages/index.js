@@ -1,16 +1,19 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { useMemo } from 'react';
+import { useMemo, useEffect, useState } from 'react';
 import dynamic from 'next/dynamic';
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
+import { useWallet } from '@solana/wallet-adapter-react';
 import '@solana/wallet-adapter-react-ui/styles.css';
 
 const WalletMultiButton = dynamic(
   () => import('@solana/wallet-adapter-react-ui').then(mod => mod.WalletMultiButton),
   { ssr: false }
 );
+
+const INITIAL_TOKENS = 10;
 
 const racers = [
   {
@@ -131,17 +134,27 @@ Now it races from the shadows, using stealth propulsion, ghost code, and blackou
   }
 ];
 
-function useRewardPunkTokens() {
-  const { connected, publicKey } = useWallet();
+function useRewardPunkTokens(setTokens) {
+  const wallet = useWallet();
   const [rewarded, setRewarded] = useState(false);
 
   useEffect(() => {
-    if (connected && publicKey && !rewarded) {
-      console.log(`Rewarded 10 $PUNK to ${publicKey.toBase58()}`);
-      alert('You received 10 $PUNK tokens (valueless for now) just for connecting your wallet!');
-      setRewarded(true);
+    if (wallet?.connected && wallet?.publicKey) {
+      const rewardKey = `rewarded-${wallet.publicKey}`;
+      const storedReward = localStorage.getItem(rewardKey);
+      const storedTokens = localStorage.getItem(`tokens-${wallet.publicKey}`);
+
+      if (!storedReward && !rewarded) {
+        localStorage.setItem(rewardKey, 'true');
+        localStorage.setItem(`tokens-${wallet.publicKey}`, INITIAL_TOKENS);
+        setTokens(INITIAL_TOKENS);
+        setRewarded(true);
+        alert('You received 10 $PUNK tokens (valueless for now) just for connecting your wallet! You can now $punk on the races!');
+      } else if (storedTokens !== null) {
+        setTokens(Number(storedTokens));
+      }
     }
-  }, [connected, publicKey, rewarded]);
+  }, [wallet, rewarded, setTokens]);
 }
 
 export default function HomePage() {
@@ -159,23 +172,46 @@ export default function HomePage() {
 }
 
 function MainContent() {
-  useRewardPunkTokens();
-  const [betPlaced, setBetPlaced] = useState(false);
+  const wallet = useWallet();
+  const [tokens, setTokens] = useState(0);
+  const [betHistory, setBetHistory] = useState([]);
 
-  const placeBet = () => {
-    setBetPlaced(true);
-    alert('Good luck you degenerate! Bet placed.');
+  useRewardPunkTokens(setTokens);
+
+  useEffect(() => {
+    if (wallet?.publicKey) {
+      const savedBets = localStorage.getItem(`bets-${wallet.publicKey}`);
+      if (savedBets) setBetHistory(JSON.parse(savedBets));
+    }
+  }, [wallet?.publicKey]);
+
+  const placeBet = (racerName) => {
+    if (tokens >= 10) {
+      const newTokens = tokens - 10;
+      setTokens(newTokens);
+      localStorage.setItem(`tokens-${wallet.publicKey}`, newTokens);
+
+      const newEntry = { name: racerName, timestamp: new Date().toLocaleString() };
+      const updatedBets = [...betHistory, newEntry];
+      setBetHistory(updatedBets);
+      localStorage.setItem(`bets-${wallet.publicKey}`, JSON.stringify(updatedBets));
+
+      alert('Good luck you degenerate! Bet placed. Check wallet for betslip!');
+    } else {
+      alert('Not enough $PUNK, come back when you have bigger balls!.');
+    }
   };
 
   return (
     <div className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-8" style={{ backgroundImage: "url('/background.png')" }}>
-      <div className="absolute top-6 left-6 flex flex-col w-fit z-20">
+      <div className="fixed top-6 left-6 flex flex-col w-fit z-20">
         <a href="/" className="panel-link rounded-t-md">🏁 Home</a>
-        <a href="/weekly-track-report" className="panel-link">📈 Weekly Report</a>
         <a href="/weather-forecast" className="panel-link">⛈ Weather</a>
         <a href="/interactions" className="panel-link">🤖 Interact</a>
         <a href="/ceo-message" className="panel-link rounded-b-md">👑 CEO Message</a>
-      </div>
+        <a href="/wallet-page" className="panel-link">💰 Wallet</a>
+       <a href="/weekly-messages" className="panel-link rounded-b-md">📈 Weekly Messages</a>
+       </div>
 
       <div className="flex justify-between items-start mb-10">
         <h1 className="w-full text-center text-4xl md:text-6xl font-extrabold tracking-tight arcade-text">
@@ -186,12 +222,13 @@ function MainContent() {
         </div>
       </div>
 
-      {/* Racer Cards */}
+      <div className="text-center mb-6 text-lg">$PUNK Balance: {tokens}</div>
+
       <div id="racers" className="grid grid-cols-1 md:grid-cols-3 gap-10">
         {racers.map((racer, index) => (
           <div
             key={index}
-            className="flex flex-col md:flex-row items-center gap-4 bg-black bg-opacity-60 p-4 rounded-xl shadow-lg transform transition duration-300 hover:scale-105"
+            className="flex flex-col md:flex-row items-center gap-4 bg-transparent backdrop-blur-lg p-4 rounded-xl border border-white border-opacity-20 shadow-lg ..."
           >
             <div className="w-full md:w-1/2">
               <div className="relative w-full h-[300px] rounded-xl overflow-hidden">
@@ -208,7 +245,7 @@ function MainContent() {
             <div className="w-full md:w-1/2 text-sm whitespace-pre-wrap">
               <h2 className="text-xl font-bold mb-2 text-center md:text-left">{racer.name}</h2>
               <p className="mb-2">{racer.backstory}</p>
-              <button onClick={placeBet} className="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-md text-sm font-semibold shadow-md">
+              <button onClick={() => placeBet(racer.name)} className="w-full mt-2 bg-purple-600 hover:bg-purple-700 text-white py-2 rounded-md text-sm font-semibold shadow-md">
                 Bet 10 $PUNK
               </button>
             </div>
@@ -216,12 +253,25 @@ function MainContent() {
         ))}
       </div>
 
-      {/* Connect Wallet Button */}
+      <div className="mt-10 text-center">
+        <h2 className="text-2xl font-bold mb-4">📜 Bet History</h2>
+        {betHistory.length > 0 ? (
+          <ul className="text-sm space-y-2">
+            {betHistory.map((entry, i) => (
+              <li key={i}>
+                Bet on <strong>{entry.name}</strong> at {entry.timestamp}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p className="text-gray-400">No bets placed yet.</p>
+        )}
+      </div>
+
       <div id="wallet" className="mt-10 text-center">
         <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
       </div>
 
-      {/* Social Bar */}
       <div id="socials" className="mt-10 flex justify-center gap-10 items-center">
         <a href="https://x.com/PnkRacerz" target="_blank" rel="noopener noreferrer">
           <Image src="/x.png" alt="X link" width={40} height={40} />
