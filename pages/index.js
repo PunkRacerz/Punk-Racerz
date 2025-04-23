@@ -208,17 +208,15 @@ function MainContent() {
         <a href="/" className="panel-link rounded-t-md">🏁 Home</a>
         <a href="/weather-forecast" className="panel-link">⛈ Weather</a>
         <a href="/interactions" className="panel-link">🤖 Interact</a>
-        <a href="/ceo-message" className="panel-link rounded-b-md">👑 CEO Message</a>
+        <a href="/ceo-message" className="panel-link">👑 CEO Message</a>
         <a href="/wallet-page" className="panel-link">💰 Wallet</a>
-       <a href="/weekly-messages" className="panel-link rounded-b-md">📈 Weekly Messages</a>
-       </div>
+        <a href="/weekly-messages" className="panel-link rounded-b-md">📈 Weekly Announcements</a>
+        <a href="/race-simulator" className="panel-link rounded-b-md">🎮 Race Simulator</a>
+      </div>
 
-      <div className="flex justify-between items-start mb-10">
-        <h1 className="w-full text-center text-4xl md:text-6xl font-extrabold tracking-tight arcade-text">
-          PUNKRACERZ
-        </h1>
-        <div className="w-16 md:w-20">
-          <Image src="/logo.png" alt="PunkRacerz Logo" width={80} height={80} />
+      <div className="flex justify-center items-center mb-10">
+        <div className="w-64 md:w-[400px]">
+          <Image src="/logo.png" alt="PunkRacerz Logo" width={400} height={400} />
         </div>
       </div>
 
@@ -228,7 +226,7 @@ function MainContent() {
         {racers.map((racer, index) => (
           <div
             key={index}
-            className="flex flex-col md:flex-row items-center gap-4 bg-transparent backdrop-blur-lg p-4 rounded-xl border border-white border-opacity-20 shadow-lg ..."
+            className="flex flex-col md:flex-row items-center gap-4 bg-transparent backdrop-blur-lg p-4 rounded-xl border border-white border-opacity-20 shadow-lg"
           >
             <div className="w-full md:w-1/2">
               <div className="relative w-full h-[300px] rounded-xl overflow-hidden">

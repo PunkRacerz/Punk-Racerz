@@ -10,6 +10,7 @@ export default function WeeklyAnnouncements() {
         <a href="/ceo-message" className="panel-link">👑 CEO Message</a>
         <a href="/wallet-page" className="panel-link">💰 Wallet</a>
         <a href="/weekly-announcements" className="panel-link rounded-b-md">📈 Weekly Announcements</a>
+        <a href="/race-simulator" className="panel-link rounded-b-md">🎮 Race Simulator</a>
       </div>
 
       <div className="text-center mb-12 mt-12">

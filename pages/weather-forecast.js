@@ -89,9 +89,10 @@ export default function WeatherForecast() {
         <a href="/" className="panel-link rounded-t-md">🏁 Home</a>
         <a href="/weather-forecast" className="panel-link">⛈ Weather</a>
         <a href="/interactions" className="panel-link">🤖 Interact</a>
-        <a href="/wallet-page" className="panel-link">💳 Wallet</a>
-        <a href="/ceo-message" className="panel-link rounded-b-md">👑 CEO Message</a>
-        <a href="/weekly-messages" className="panel-link rounded-b-md">📈 Weekly Messages</a>
+        <a href="/ceo-message" className="panel-link">👑 CEO Message</a>
+        <a href="/wallet-page" className="panel-link">💰 Wallet</a>
+        <a href="/weekly-messages" className="panel-link">📈 Weekly Announcements</a>
+        <a href="/race-simulator" className="panel-link rounded-b-md">🎮 Race Simulator</a>
       </div>
 
       <motion.div className="relative z-10"

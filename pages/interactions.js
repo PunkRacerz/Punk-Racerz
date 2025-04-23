@@ -10,7 +10,8 @@ export default function Interactions() {
         <a href="/interactions" className="panel-link">🤖 Interactions</a>
         <a href="/ceo-message" className="panel-link">👑 CEO Message</a>
         <a href="/wallet-page" className="panel-link">💰 Wallet</a>
-        <a href="/weekly-announcements" className="panel-link rounded-b-md">📈 Weekly Announcements</a>
+        <a href="/weekly-messages" className="panel-link rounded-b-md">📈 Weekly Announcements</a>
+        <a href="/race-simulator" className="panel-link rounded-b-md">🎮 Race Simulator</a>
       </div>
 
       {/* Page Title */}
