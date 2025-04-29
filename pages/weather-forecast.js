@@ -66,10 +66,7 @@ const weatherAnimations = {
 
 export default function WeatherForecast() {
   return (
-    <div
-      className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-8 relative overflow-hidden"
-      style={{ backgroundImage: "url('/background.png')" }}
-    >
+    <div className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-8 relative overflow-hidden" style={{ backgroundImage: "url('/background.png')" }}>
       {/* Weather Particles */}
       {Object.entries(weatherAnimations).map(([weather, icon]) => (
         <div key={weather} className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -91,26 +88,24 @@ export default function WeatherForecast() {
           ))}
         </div>
       ))}
-    </div>
-  );
-}
 
-return (
-    <div className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-8" style={{ backgroundImage: "url('/background.png')" }}>
-      <div className="fixed top-6 left-6 flex flex-col w-fit z-20">
-        <Link href="/" className="panel-link rounded-t-md">🏁 Home</Link>
-        <Link href="/weather-forecast" className="panel-link">⛈ Weather</Link>
-        <Link href="/interactions" className="panel-link">🤖 Interact</Link>
-        <Link href="/ceo-message" className="panel-link">👑 CEO Message</Link>
-        <Link href="/wallet-page" className="panel-link">💰 Wallet</Link>
-        <Link href="/weekly-messages" className="panel-link rounded-b-md">📈 Weekly Announcements</Link>
-        <Link href="/race-simulator" className="panel-link rounded-b-md">🎮 Race Simulator</Link>
-      </div>
+      {/* Navigation Menu */}
+      <div className="fixed top-6 left-6 flex flex-col w-fit z-50 bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 space-y-2">
+  <Link href="/" className="menu-link">🏁 Home</Link>
+  <Link href="/weather-forecast" className="menu-link">⛈ Weather</Link>
+  <Link href="/interactions" className="menu-link">🤖 Interact</Link>
+  <Link href="/ceo-message" className="menu-link">👑 CEO Message</Link>
+  <Link href="/wallet-page" className="menu-link">💰 Wallet</Link>
+  <Link href="/weekly-messages" className="menu-link">📈 Weekly Announcements</Link>
+  <Link href="/race-simulator" className="menu-link">🎮 Race Simulator</Link>
+</div>
 
+      {/* Forecast Content */}
       <motion.div className="relative z-10"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 1 }}>
+        transition={{ duration: 1 }}
+      >
         <h1 className="text-center text-5xl md:text-6xl font-bold mb-16 text-white tracking-wider" style={{ fontFamily: 'Share Tech Mono, monospace' }}>
           ☁️ Weather Forecast Channel
         </h1>
@@ -125,11 +120,14 @@ return (
             transition={{ duration: 0.8 }}
           >
             <Image src={`/${weather.toLowerCase().replace(/ /g, '-')}.png`} alt={weather} width={240} height={160} className="mx-auto rounded-xl border border-white border-opacity-10 shadow-lg" />
-            <h2 className="text-4xl mt-6 font-extrabold tracking-wide text-white uppercase" style={{ fontFamily: 'Share Tech Mono, monospace' }}>{weather}</h2>
+            <h2 className="text-4xl mt-6 font-extrabold tracking-wide text-white uppercase" style={{ fontFamily: 'Share Tech Mono, monospace' }}>
+              {weather}
+            </h2>
             <p className="mt-4 text-base italic text-white max-w-xl mx-auto">
-              {weather === 'Super Snow' && 'The sky vomits snowman heads. Carrot noses everywhere. Blizzard.EXE must be "frustrated" again. Visibility down, chaos up. Cold enough to make AI circuits tremble.'}
-              {weather === 'Rabbit Rain' && 'Rabbits fall from the sky. Not metaphorically—actual, cartoonish rabbits, soft and squeaky. No one knows why. No one can stop it. Some say GlitchFang wished for this in his sleep. Others blame Spark. The sky is just... full of bunnies.'}
-              {weather === 'Fire Fog' && 'ScrapDrift has been smoking his "herbs" again. Hot, thick smoke mixed with firestorms and glowing ash. Breathing not advised. Seeing optional. Cook your steak on the hood.'}
+              {/* Fun dynamic text based on weather */}
+              {weather === 'Super Snow' && 'The sky vomits snowman heads. Blizzard.EXE must be \"frustrated\" again.'}
+              {weather === 'Rabbit Rain' && 'Rabbits fall from the sky. Total bunny chaos. Blame GlitchFang.'}
+              {weather === 'Fire Fog' && 'ScrapDrift is hotboxing the track. Visibility: optional.'}
             </p>
             <h3 className="text-2xl font-bold mt-10 mb-4 text-white tracking-tight">🎲 To Boost or Not to Boost?</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm text-white">
@@ -144,6 +142,7 @@ return (
         ))}
       </motion.div>
 
+      {/* Styles */}
       <style jsx>{`
         .panel-link {
           background: rgba(255, 255, 255, 0.08);
@@ -164,4 +163,4 @@ return (
       `}</style>
     </div>
   );
-
+}

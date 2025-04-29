@@ -1,64 +1,71 @@
+import Link from 'next/link';
+import { motion } from 'framer-motion';
 import Image from 'next/image';
+import React from 'react';
 
 export default function WeeklyAnnouncements() {
   return (
     <div className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-8" style={{ backgroundImage: "url('/background.png')" }}>
-      <div className="fixed top-6 left-6 flex flex-col w-fit z-20">
-        <Link href="/" className="panel-link rounded-t-md">🏁 Home</Link>
-        <Link href="/weather-forecast" className="panel-link">⛈ Weather</Link>
-        <Link href="/interactions" className="panel-link">🤖 Interact</Link>
-        <Link href="/ceo-message" className="panel-link">👑 CEO Message</Link>
-        <Link href="/wallet-page" className="panel-link">💰 Wallet</Link>
-        <Link href="/weekly-messages" className="panel-link rounded-b-md">📈 Weekly Announcements</Link>
-        <Link href="/race-simulator" className="panel-link rounded-b-md">🎮 Race Simulator</Link>
-      </div>
+      {/* Navigation Menu */}
+      <div className="fixed top-6 left-6 flex flex-col w-fit z-50 bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 space-y-2">
+  <Link href="/" className="menu-link">🏁 Home</Link>
+  <Link href="/weather-forecast" className="menu-link">⛈ Weather</Link>
+  <Link href="/interactions" className="menu-link">🤖 Interact</Link>
+  <Link href="/ceo-message" className="menu-link">👑 CEO Message</Link>
+  <Link href="/wallet-page" className="menu-link">💰 Wallet</Link>
+  <Link href="/weekly-messages" className="menu-link">📈 Weekly Announcements</Link>
+  <Link href="/race-simulator" className="menu-link">🎮 Race Simulator</Link>
+</div>
 
-      <div className="text-center mb-12 mt-12">
-        <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight arcade-text">📣 Weekly Announcements</h1>
-      </div>
+      {/* Announcements Section */}
+      <motion.div className="relative z-10"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 1 }}
+      >
+        <h1 className="text-center text-5xl md:text-6xl font-bold mb-16 text-white tracking-wider" style={{ fontFamily: 'Share Tech Mono, monospace' }}>
+          📈 Weekly Announcements
+        </h1>
 
-      <div className="max-w-3xl mx-auto space-y-12">
-        <div className="bg-transparent backdrop-blur-lg p-6 rounded-xl border border-white border-opacity-20 shadow-lg">
-          <h2 className="text-2xl font-bold mb-2">🔥 Weather Engine Update</h2>
-          <p className="text-white text-opacity-90">
-            The weather system is now live! Expect chaos: from raining rabbits to flaming fog. Each forecast has real impact on racer performance. Check out our latest probability indicators and see how it affects your favourite agent! More weather types landing soon!
-          </p>
+        {/* Example Announcement */}
+        <div className="max-w-4xl mx-auto px-8">
+          <motion.div
+            className="p-6 mb-10 rounded-3xl bg-transparent backdrop-blur-xl shadow-2xl border border-white border-opacity-20 transition-transform hover:scale-105"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <h2 className="text-3xl font-bold mb-4" style={{ fontFamily: 'Share Tech Mono, monospace' }}>🏎️ Race Update</h2>
+            <p className="text-lg leading-relaxed">
+              PunkRacerz just completed its wildest race yet! Spark accidentally started a bunny avalanche, GlitchFang teleported into a billboard, and Venoma poisoned the water coolers (again). Stay tuned for the new *Rocket League-style Nitro Update* dropping soon!
+            </p>
+          </motion.div>
+
+          <motion.div
+            className="p-6 mb-10 rounded-3xl bg-transparent backdrop-blur-xl shadow-2xl border border-white border-opacity-20 transition-transform hover:scale-105"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <h2 className="text-3xl font-bold mb-4" style={{ fontFamily: 'Share Tech Mono, monospace' }}>🔥 Upcoming Tournament</h2>
+            <p className="text-lg leading-relaxed">
+              🚨 ANNOUNCEMENT: Neon Spine Express will host the *first* PunkRacerz Weekly Tournament!  
+              Bet SOL, win custom NFTs, and unlock legendary car skins.  
+              Registration opens this Friday — limited spots available!
+            </p>
+          </motion.div>
         </div>
+      </motion.div>
 
-        <div className="bg-transparent backdrop-blur-lg p-6 rounded-xl border border-white border-opacity-20 shadow-lg">
-          <h2 className="text-2xl font-bold mb-2">🚧 Track Spotlight: Neon Spine Express</h2>
-          <p className="text-white text-opacity-90">
-            This week’s race takes place on the infamous Neon Spine Express. A treacherous circuit where reflexes reign supreme. Take a look at our latest odds for each racer on this tumultuous track! A preview of the next track, "Ashrift Dunes", will be revealed following the first race! *hint* Always pay attention to the background!
-          </p>
-        </div>
-
-        <div className="bg-transparent backdrop-blur-lg p-6 rounded-xl border border-white border-opacity-20 shadow-lg">
-          <h2 className="text-2xl font-bold mb-2">💸 Betting Beta Launched</h2>
-          <p className="text-white text-opacity-90">
-            Users can now connect their wallet and bet 10 $PUNK on their favorite racer. Win or lose, it’s all in the chaos. No official token yet. Stay tuned for updates. Token announcement coming soon!
-          </p>
-        </div>
-
-        <div className="bg-transparent backdrop-blur-lg p-6 rounded-xl border border-white border-opacity-20 shadow-lg">
-          <h2 className="text-2xl font-bold mb-2">🧃 New Character Interactions!</h2>
-          <p className="text-white text-opacity-90">
-            Check out the interaction page for storylines building between the agents! Fully automated dialect. Brand new race previews available from Spark and GlitchFang! Tune in, it may help your chances of winning!
-          </p>
-        </div>
-      </div>
-
+      {/* Custom Styles */}
       <style jsx>{`
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-        .arcade-text {
-          font-family: 'Press Start 2P', monospace;
-          color: #00ffff;
-          text-shadow: 0 0 6px #0ff, 0 0 12px #f0f;
-        }
         .panel-link {
-          display: block;
-          background: rgba(255, 255, 255, 0.05);
+          background: rgba(255, 255, 255, 0.08);
+          backdrop-filter: blur(10px);
           padding: 0.75rem 1.5rem;
-          border: 1px solid rgba(255, 255, 255, 0.1);
+          border: 1px solid rgba(255, 255, 255, 0.15);
           color: white;
           font-family: 'Share Tech Mono', monospace;
           font-weight: bold;
@@ -66,8 +73,9 @@ export default function WeeklyAnnouncements() {
           transition: all 0.2s ease-in-out;
         }
         .panel-link:hover {
-          background: rgba(255, 255, 255, 0.12);
-          transform: translateX(4px);
+          background: rgba(255, 255, 255, 0.15);
+          transform: translateX(4px) scale(1.02);
+          box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
       `}</style>
     </div>
