@@ -66,7 +66,10 @@ const weatherAnimations = {
 
 export default function WeatherForecast() {
   return (
-    <div className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-8 relative overflow-hidden" style={{ backgroundImage: "url('/background.png')" }}>
+    <div
+      className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-8 relative overflow-hidden"
+      style={{ backgroundImage: "url('/background.png')" }}
+    >
       {/* Weather Particles */}
       {Object.entries(weatherAnimations).map(([weather, icon]) => (
         <div key={weather} className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
@@ -77,22 +80,31 @@ export default function WeatherForecast() {
               style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
               initial={{ y: -100, opacity: 0 }}
               animate={{ y: '110vh', opacity: 1 }}
-              transition={{ duration: Math.random() * 4 + 4, delay: Math.random() * 5, repeat: Infinity }}
+              transition={{
+                duration: Math.random() * 4 + 4,
+                delay: Math.random() * 5,
+                repeat: Infinity,
+              }}
             >
               {icon}
             </motion.div>
           ))}
         </div>
       ))}
+    </div>
+  );
+}
 
+return (
+    <div className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-8" style={{ backgroundImage: "url('/background.png')" }}>
       <div className="fixed top-6 left-6 flex flex-col w-fit z-20">
-        <a href="/" className="panel-link rounded-t-md">🏁 Home</a>
-        <a href="/weather-forecast" className="panel-link">⛈ Weather</a>
-        <a href="/interactions" className="panel-link">🤖 Interact</a>
-        <a href="/ceo-message" className="panel-link">👑 CEO Message</a>
-        <a href="/wallet-page" className="panel-link">💰 Wallet</a>
-        <a href="/weekly-messages" className="panel-link">📈 Weekly Announcements</a>
-        <a href="/race-simulator" className="panel-link rounded-b-md">🎮 Race Simulator</a>
+        <Link href="/" className="panel-link rounded-t-md">🏁 Home</Link>
+        <Link href="/weather-forecast" className="panel-link">⛈ Weather</Link>
+        <Link href="/interactions" className="panel-link">🤖 Interact</Link>
+        <Link href="/ceo-message" className="panel-link">👑 CEO Message</Link>
+        <Link href="/wallet-page" className="panel-link">💰 Wallet</Link>
+        <Link href="/weekly-messages" className="panel-link rounded-b-md">📈 Weekly Announcements</Link>
+        <Link href="/race-simulator" className="panel-link rounded-b-md">🎮 Race Simulator</Link>
       </div>
 
       <motion.div className="relative z-10"
@@ -152,4 +164,4 @@ export default function WeatherForecast() {
       `}</style>
     </div>
   );
-}
+

@@ -63,13 +63,13 @@ function WalletPage() {
   return (
     <div className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-8" style={{ backgroundImage: "url('/background.png')" }}>
       <div className="fixed top-6 left-6 flex flex-col w-fit z-20">
-        <a href="/" className="panel-link rounded-t-md">🏁 Home</a>
-        <a href="/weather-forecast" className="panel-link">⛈ Weather</a>
-        <a href="/interactions" className="panel-link">🤖 Interact</a>
-        <a href="/ceo-message" className="panel-link">👑 CEO Message</a>
-        <a href="/wallet-page" className="panel-link">💰 Wallet</a>
-        <a href="/weekly-messages" className="panel-link rounded-b-md">📈 Weekly Announcements</a>
-        <a href="/race-simulator" className="panel-link rounded-b-md">🎮 Race Simulator</a>
+        <Link href="/" className="panel-link rounded-t-md">🏁 Home</Link>
+        <Link href="/weather-forecast" className="panel-link">⛈ Weather</Link>
+        <Link href="/interactions" className="panel-link">🤖 Interact</Link>
+        <Link href="/ceo-message" className="panel-link">👑 CEO Message</Link>
+        <Link href="/wallet-page" className="panel-link">💰 Wallet</Link>
+        <Link href="/weekly-messages" className="panel-link rounded-b-md">📈 Weekly Announcements</Link>
+        <Link href="/race-simulator" className="panel-link rounded-b-md">🎮 Race Simulator</Link>
       </div>
 
       <div className="flex justify-between items-start mb-10">
