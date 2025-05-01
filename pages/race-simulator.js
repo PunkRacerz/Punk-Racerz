@@ -1,56 +1,75 @@
-import { useState } from 'react';
+import { useState, useRef, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
+import { NeonSpineTrack } from '@/components/neonspinetrack';
 import PlayerKart from '@/components/playerkart';
-import { NeonSpineTrack } from '@/components/neonspinetrack'; // ← Note the curly braces!
 import Link from 'next/link';
+import { Physics } from '@react-three/rapier';
 
 export default function RaceSimulatorPage() {
   const [started, setStarted] = useState(false);
+  const [trackPoints, setTrackPoints] = useState([]);
+
+  const orbRefs = useRef([]);
+  const orbCallback = useRef(null);
+
+  const registerOrbs = (data) => {
+    if (Array.isArray(data)) {
+      orbRefs.current = data;
+      if (typeof orbCallback.current === 'function') {
+        orbCallback.current(data);
+      }
+    } else if (typeof data === 'function') {
+      orbCallback.current = data;
+    }
+  };
 
   if (!started) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-black text-white">
         <button
           onClick={() => setStarted(true)}
-          className="bg-pink-500 hover:bg-pink-700 text-white font-bold py-4 px-8 rounded-2xl text-3xl arcade-text transition transform hover:scale-110"
+          className="bg-pink-500 hover:bg-purple-700 text-blue font-bold py-4 px-8 rounded-2xl text-3xl arcade-text transition transform hover:scale-110"
         >
-          PLAY?
+          ENTER CHAOS?
         </button>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-black text-white">
-      <h1 className="text-center text-4xl font-bold py-6 arcade-text">PUNKRACERZ</h1>
-      <div className="relative w-full h-screen">
-        <Canvas shadows camera={{ position: [0, 10, 20], fov: 50 }}>
-          <color attach="background" args={["#0a0a1f"]} />
-          <fog attach="fog" args={["#0a0a1f", 10, 300]} />
-          <ambientLight intensity={2} color="#ff00ff" />
-          <directionalLight
-            castShadow
-            position={[10, 20, 15]}
-            intensity={2.5}
-            shadow-mapSize-width={2048}
-            shadow-mapSize-height={2048}
-            color="#00ffff"
-          />
-          <PlayerKart />
-          <NeonSpineTrack />
-        </Canvas>
+    <div className="w-full h-screen bg-black text-white">
+      <Canvas shadows camera={{ position: [0, 8, 20], fov: 60 }}>
+        <color attach="background" args={["#0a0a1f"]} />
+        <fog attach="fog" args={["#0a0a1f", 10, 300]} />
+        <ambientLight intensity={0.8} color="#ffffff" />
+        <directionalLight
+          castShadow
+          position={[30, 40, 30]}
+          intensity={1.5}
+          shadow-mapSize-width={2048}
+          shadow-mapSize-height={2048}
+          shadow-bias={-0.0001}
+          color="#ffffff"
+        />
 
-        {/* Navigation Menu */}
-        <div className="absolute top-6 left-6 z-50 bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 flex flex-col space-y-2">
-          <Link href="/" className="menu-link">🏁 Home</Link>
-          <Link href="/weather-forecast" className="menu-link">⛈ Weather</Link>
-          <Link href="/interactions" className="menu-link">🤖 Interact</Link>
-          <Link href="/ceo-message" className="menu-link">👑 CEO Message</Link>
-          <Link href="/wallet-page" className="menu-link">💰 Wallet</Link>
-          <Link href="/weekly-messages" className="menu-link">📈 Weekly Announcements</Link>
-          <Link href="/race-simulator" className="menu-link">🎮 Race Simulator</Link>
-        </div>
-      </div>
+        <Suspense fallback={null}>
+          <Physics debug gravity={[0, -9.81, 0]}>
+          <NeonSpineTrack registerOrbs={registerOrbs} onSampledPoints={setTrackPoints} />
+          <PlayerKart registerOrbs={registerOrbs} sampledPoints={trackPoints} />
+          </Physics>
+        </Suspense>
+      </Canvas>
+
+      <div className="fixed top-6 left-6 flex flex-col w-fit z-50 bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 space-y-2">
+  <Link href="/your-racerz" className="menu-link">🎮 Your Racerz</Link>
+  <Link href="/" className="menu-link">🏁 Shop</Link>
+  <Link href="/weather-forecast" className="menu-link">⛈ Weather</Link>
+  <Link href="/interactions" className="menu-link">🤖 Interact</Link>
+  <Link href="/wallet-page" className="menu-link">💰 Wallet</Link>
+  <Link href="/weekly-messages" className="menu-link">📈 Weekly Announcements</Link>
+  <Link href="/race-simulator" className="menu-link">🎮 Race Simulator</Link>
+  
+</div>
 
       <style jsx>{`
         .arcade-text {
@@ -73,4 +92,5 @@ export default function RaceSimulatorPage() {
     </div>
   );
 }
+
   

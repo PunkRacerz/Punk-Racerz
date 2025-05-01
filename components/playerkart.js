@@ -1,24 +1,33 @@
 import { useRef, useState, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
 import * as THREE from 'three';
+import { RigidBody, useRapier } from '@react-three/rapier';
 
-const barrierBoxes = []; // Optional: import from global if shared
 
-export default function playerkart() {
+export default function PlayerKart({ registerOrbs, sampledPoints }) {
   const kartRef = useRef();
   const speed = useRef(0);
   const rotation = useRef(0);
   const driftBoost = useRef(0);
   const keys = useRef({});
-  const orbitControlsRef = useRef();
   const [shake, setShake] = useState(false);
   const shakeTime = useRef(0);
   const isBoosting = useRef(false);
   const boostTime = useRef(0);
   const isJumping = useRef(false);
-  const jumpVelocity = useRef(0);
   const specialUsed = useRef(false);
+  const orbRefs = useRef([]);
+
+  const { rapier, world } = useRapier();
+
+  useEffect(() => {
+    const receiveOrbRefs = (refs) => {
+      orbRefs.current = refs;
+    };
+    if (typeof registerOrbs === 'function') {
+      registerOrbs(receiveOrbRefs);
+    }
+  }, [registerOrbs]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -29,137 +38,139 @@ export default function playerkart() {
       if (window.location.pathname !== '/race-simulator') return;
       keys.current[e.key.toLowerCase()] = false;
     };
-
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
-
     return () => {
       window.removeEventListener('keydown', handleKeyDown);
       window.removeEventListener('keyup', handleKeyUp);
     };
   }, []);
 
+  const progress = useRef(0);
+
   useFrame((state, delta) => {
-    const kart = kartRef.current;
+    const rigidBody = kartRef.current;
     const camera = state.camera;
-
-    if (!kart || !kart.position || !camera) return;
-
+    if (!rigidBody || !camera) return;
+  
+    // Control movement
     if (keys.current['w']) speed.current = Math.min(speed.current + 15 * delta, 20);
     else if (keys.current['s']) speed.current = Math.max(speed.current - 15 * delta, -5);
     else speed.current = Math.max(speed.current - 8 * delta, 0);
-
-    let turning = false;
-    if (keys.current['a']) {
-      rotation.current += 2.5 * delta;
-      turning = true;
+  
+    if (keys.current['a']) rotation.current += 2.5 * delta;
+    if (keys.current['d']) rotation.current -= 2.5 * delta;
+  
+    // Boost
+    if (keys.current['b'] && !isBoosting.current) {
+      isBoosting.current = true;
+      boostTime.current = 2;
+      speed.current = Math.min(speed.current + 10, 30);
     }
-    if (keys.current['d']) {
-      rotation.current -= 2.5 * delta;
-      turning = true;
+    if (isBoosting.current) {
+      boostTime.current -= delta;
+      if (boostTime.current <= 0) isBoosting.current = false;
     }
-
-    if (turning && Math.abs(speed.current) > 5) {
-      setShake(true);
-      shakeTime.current = 0.2;
+  
+    // Jump
+    if (keys.current[' '] && !isJumping.current) {
+      isJumping.current = true;
     }
-
-    if (turning && speed.current > 10 && driftBoost.current <= 0) {
-      driftBoost.current = 3;
+  
+    // Special ability
+    if (keys.current['n'] && !specialUsed.current) {
+      specialUsed.current = true;
+      console.log("Special move activated!");
     }
-if (keys.current['b'] && !isBoosting.current) {
-  isBoosting.current = true;
-  boostTime.current = 2; // boost duration in seconds
-  speed.current = Math.min(speed.current + 10, 30); // boost limit
-}
-
-if (isBoosting.current) {
-  boostTime.current -= delta;
-  if (boostTime.current <= 0) {
-    isBoosting.current = false;
-  }
-}
-
-// Jump with 'Space'
-if (keys.current[' '] && !isJumping.current) {
-  isJumping.current = true;
-  jumpVelocity.current = 6;
-}
-
-if (isJumping.current) {
-  kart.position.y += jumpVelocity.current * delta;
-  jumpVelocity.current -= 20 * delta;
-  if (kart.position.y <= 0.5) {
-    kart.position.y = 0.5;
-    isJumping.current = false;
-  }
-}
-
-// Special Move with 'N' (placeholder logic)
-if (keys.current['n'] && !specialUsed.current) {
-  specialUsed.current = true;
-  console.log("Special move activated!");
-  // insert character-specific logic later here
-}
-    kart.rotation.y = rotation.current;
-
+  
+    // Calculate movement
     const forward = new THREE.Vector3(Math.sin(rotation.current), 0, Math.cos(rotation.current));
-    let driftMultiplier = driftBoost.current > 0 ? 1.5 : 1;
-    const nextPosition = kart.position.clone().addScaledVector(forward, speed.current * driftMultiplier * delta);
-
-    const collision = barrierBoxes.some(box => {
-      return nextPosition.x > box.min.x && nextPosition.x < box.max.x && nextPosition.z > box.min.z && nextPosition.z < box.max.z;
-    });
-
-    if (!collision) {
-      kart.position.copy(nextPosition);
-    } else {
-      speed.current = -speed.current * 0.5;
+    const moveDelta = forward.clone().multiplyScalar(speed.current * delta);
+    const currentPos = rigidBody.translation();
+  
+    const nextPos = {
+      x: currentPos.x + moveDelta.x,
+      y: currentPos.y,
+      z: currentPos.z + moveDelta.z,
+    };
+  
+    // ✅ Raycast hover + tilt (no sampledPoints check)
+    if (world) {
+      const rayStart = new THREE.Vector3(currentPos.x, currentPos.y + 1, currentPos.z);
+      const rayDir = new THREE.Vector3(0, -1, 0);
+  
+      const rayHit = world.castRay({ origin: rayStart, dir: rayDir }, 2, true);
+  
+      if (rayHit && rayHit.toi !== undefined) {
+        const surfaceNormal = new THREE.Vector3(rayHit.normal.x, rayHit.normal.y, rayHit.normal.z).normalize();
+        const targetY = rayStart.y - rayHit.toi + 0.3; // hover height above surface
+        nextPos.y = THREE.MathUtils.lerp(currentPos.y, targetY, 0.2); // smooth height transition
+  
+        const up = new THREE.Vector3(0, 1, 0);
+        const tiltQuat = new THREE.Quaternion().setFromUnitVectors(up, surfaceNormal);
+        const facingQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, rotation.current, 0));
+        const combinedQuat = facingQuat.clone().multiply(tiltQuat);
+        rigidBody.setNextKinematicRotation(combinedQuat);
+      }
     }
-
+  
+    // Apply position
+    rigidBody.setNextKinematicTranslation(nextPos);
+  
+    // ORB collection
+    orbRefs.current.forEach((orb, i) => {
+      if (!orb || !orb.position) return;
+      const dist = new THREE.Vector3(nextPos.x, nextPos.y, nextPos.z).distanceTo(orb.position);
+      if (dist < 1.5) {
+        orb.visible = false;
+        if (orb.material?.color?.set) orb.material.color.set('red');
+        setTimeout(() => {
+          orb.visible = true;
+          if (orb.material?.color?.set) orb.material.color.set('cyan');
+        }, 5000);
+      }
+    });
+  
     if (driftBoost.current > 0) {
       driftBoost.current -= delta;
       if (driftBoost.current <= 0) driftBoost.current = 0;
     }
-
-    const desiredPosition = new THREE.Vector3(
-      kart.position.x - Math.sin(rotation.current) * 5,
-      kart.position.y + 3,
-      kart.position.z - Math.cos(rotation.current) * 5
+  
+    // Update camera (no OrbitControls anymore)
+    const camOffset = forward.clone().multiplyScalar(-7); // further back
+    camOffset.y += 4; // higher view
+    const desiredCamPos = new THREE.Vector3(
+      nextPos.x + camOffset.x,
+      nextPos.y + camOffset.y,
+      nextPos.z + camOffset.z
     );
-
-    if (orbitControlsRef.current) {
-      orbitControlsRef.current.target.copy(kart.position);
+  
+    if (shake && shakeTime.current > 0) {
+      desiredCamPos.x += (Math.random() - 0.5) * 0.2;
+      desiredCamPos.y += (Math.random() - 0.5) * 0.2;
+      desiredCamPos.z += (Math.random() - 0.5) * 0.2;
+      shakeTime.current -= delta;
+    } else {
+      setShake(false);
     }
-
-    if (camera.position && camera.lookAt) {
-      if (shake && shakeTime.current > 0) {
-        camera.position.x += (Math.random() - 0.5) * 0.2;
-        camera.position.y += (Math.random() - 0.5) * 0.2;
-        camera.position.z += (Math.random() - 0.5) * 0.2;
-        shakeTime.current -= delta;
-      } else {
-        setShake(false);
-      }
-      camera.position.lerp(desiredPosition, 5 * delta);
-      camera.lookAt(kart.position);
-    }
+  
+    camera.position.lerp(desiredCamPos, 3 * delta);
+    camera.lookAt(new THREE.Vector3(nextPos.x, nextPos.y, nextPos.z));
   });
 
   return (
-    <>
-      <mesh ref={kartRef} position={[0, 0.5, 0]} castShadow>
-        <boxGeometry args={[0.5, 0.5, 2]} />
+    <RigidBody
+      ref={kartRef}
+      type="kinematicPosition"
+      colliders="cuboid"
+      position={[0, 1, 0]}
+      linearDamping={1}
+      angularDamping={1}
+    >
+      <mesh castShadow receiveShadow>
+        <boxGeometry args={[1, 0.5, 2]} />
         <meshStandardMaterial color="hotpink" />
       </mesh>
-      <OrbitControls
-        ref={orbitControlsRef}
-        enablePan={false}
-        enableZoom={true}
-        enableRotate={true}
-        maxPolarAngle={Math.PI / 2}
-        minPolarAngle={Math.PI / 3}
-      />
-    </>
+    </RigidBody>
   );
 }

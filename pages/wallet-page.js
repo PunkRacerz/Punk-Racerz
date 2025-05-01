@@ -63,13 +63,14 @@ function WalletPage() {
   return (
     <div className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-8" style={{ backgroundImage: "url('/background.png')" }}>
       <div className="fixed top-6 left-6 flex flex-col w-fit z-50 bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 space-y-2">
-  <Link href="/" className="menu-link">🏁 Home</Link>
+  <Link href="/your-racerz" className="menu-link">🎮 Your Racerz</Link>
+  <Link href="/" className="menu-link">🏁 Shop</Link>
   <Link href="/weather-forecast" className="menu-link">⛈ Weather</Link>
   <Link href="/interactions" className="menu-link">🤖 Interact</Link>
-  <Link href="/ceo-message" className="menu-link">👑 CEO Message</Link>
   <Link href="/wallet-page" className="menu-link">💰 Wallet</Link>
   <Link href="/weekly-messages" className="menu-link">📈 Weekly Announcements</Link>
   <Link href="/race-simulator" className="menu-link">🎮 Race Simulator</Link>
+  
 </div>
 
       <div className="flex justify-between items-start mb-10">
