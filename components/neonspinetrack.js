@@ -1,8 +1,7 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
-import { Vector3, CatmullRomCurve3, TubeGeometry } from 'three';
+import { Vector3, CatmullRomCurve3, Shape, ExtrudeGeometry } from 'three';
 import pointsData from '../data/trackPoints.json';
 import { useLoader } from '@react-three/fiber';
-import { TextureLoader } from 'three';
 import { RigidBody } from '@react-three/rapier';
 import * as THREE from 'three';
 
@@ -14,42 +13,42 @@ export function NeonSpineTrack({ registerOrbs }) {
 
   const safeRawPoints = elevatedPoints
     .filter(([x, y, z]) => isFinite(x) && isFinite(y) && isFinite(z))
-    .map(([x, y, z]) => new Vector3(x * 2, y, z * 2));
+    .map(([x, y, z]) => new Vector3(x * 2, y * 1.2, z * 2));
 
-  const curve = useMemo(() => {
-    if (safeRawPoints.length < 2) {
-      console.error("🚫 Not enough valid points to form curve.");
-      return null;
-    }
-    return new CatmullRomCurve3(safeRawPoints, true, 'catmullrom', 0.75);
-  }, [safeRawPoints]);
+    const curve = useMemo(() => {
+      return new CatmullRomCurve3(safeRawPoints, true, 'catmullrom', 0.75);
+    }, [safeRawPoints]);
 
   const spacedPoints = useMemo(() => {
   if (!curve) return [];
   return curve.getSpacedPoints(100);
 }, [curve]);
 
-  const trackGeometry = useMemo(() => {
-    if (!curve) return null;
-    const geometry = new TubeGeometry(curve, 200, 4, 16, true);
-    geometry.scale(1, 0.05, 1);
-    geometry.translate(0, -0.2, 0); // optional: adjust vertical alignment // small offset to ensure it sits flush
-    return geometry;
-  }, [curve]);
+const trackGeometry = useMemo(() => {
+  if (!curve) return null;
 
-  const asphaltColor = useLoader(TextureLoader, '/textures/asphalt_color.jpg');
-  const asphaltNormal = useLoader(TextureLoader, '/textures/asphalt_normal.jpg');
-  const asphaltRoughness = useLoader(TextureLoader, '/textures/asphalt_roughness.jpg');
+  const shape = new Shape();
+  shape.moveTo(-1, 5);      // x, z
+  shape.lineTo(-1, 10);      
+  shape.lineTo(2.5, 10);
+  shape.lineTo(2.5, 10);
+  shape.lineTo(-1, 0);
+
+  const geometry = new ExtrudeGeometry(shape, {
+    steps: 200,
+    extrudePath: curve,
+    bevelEnabled: false,
+  });
+
+  return geometry;
+}, [curve]);
 
   const trackMaterial = useMemo(() => new THREE.MeshStandardMaterial({
-    map: asphaltColor,
-    normalMap: asphaltNormal,
-    roughnessMap: asphaltRoughness,
-    emissive: "#ff00ff",
-    emissiveIntensity: 0.3,
-    metalness: 0.1,
-    side: THREE.DoubleSide
-  }), [asphaltColor, asphaltNormal, asphaltRoughness]);
+    color: '#444',               // simple diffuse color
+    metalness: 0.05,             // subtle metallic look
+    roughness: 0.85,             // matte finish
+    side: THREE.DoubleSide,      // ensure both sides are visible
+  }), []);
 
   const [orbStatus, setOrbStatus] = useState(Array(25).fill(true));
   const orbRefs = useRef([]);
@@ -70,6 +69,7 @@ export function NeonSpineTrack({ registerOrbs }) {
         <bufferGeometry attach="geometry" setFromPoints={spacedPoints} />
         <lineBasicMaterial attach="material" color="yellow" linewidth={2} />
       </line>
+  
       {trackGeometry && (
         <RigidBody type="fixed" colliders="trimesh">
           <mesh geometry={trackGeometry} castShadow receiveShadow material={trackMaterial} />
