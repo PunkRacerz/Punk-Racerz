@@ -1,33 +1,28 @@
-import { useRef, useState, useEffect } from 'react';
+import { useRef, useEffect, useState, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { RigidBody, useRapier } from '@react-three/rapier';
+import { RigidBody } from '@react-three/rapier';
 
-
-export default function PlayerKart({ registerOrbs, sampledPoints }) {
+export default function PlayerKart({ sampledPoints }) {
   const kartRef = useRef();
-  const speed = useRef(0);
-  const rotation = useRef(0);
-  const driftBoost = useRef(0);
+  const meshRef = useRef();
   const keys = useRef({});
-  const [shake, setShake] = useState(false);
-  const shakeTime = useRef(0);
+
+  const yawRef = useRef(0);
   const isBoosting = useRef(false);
   const boostTime = useRef(0);
   const isJumping = useRef(false);
   const specialUsed = useRef(false);
-  const orbRefs = useRef([]);
 
-  const { rapier, world } = useRapier();
+  const fallTimer = useRef(0);
+  const [falling, setFalling] = useState(false);
+  const lastCheckpoint = useRef(new THREE.Vector3(0, 2, 0));
 
-  useEffect(() => {
-    const receiveOrbRefs = (refs) => {
-      orbRefs.current = refs;
-    };
-    if (typeof registerOrbs === 'function') {
-      registerOrbs(receiveOrbRefs);
-    }
-  }, [registerOrbs]);
+  const checkpoints = useMemo(() => {
+    return sampledPoints
+      ?.filter((_, i) => i % 10 === 0)
+      .map((pt) => new THREE.Vector3(pt.x, pt.y + 1, pt.z)) || [];
+  }, [sampledPoints]);
 
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -37,6 +32,7 @@ export default function PlayerKart({ registerOrbs, sampledPoints }) {
     const handleKeyUp = (e) => {
       if (window.location.pathname !== '/race-simulator') return;
       keys.current[e.key.toLowerCase()] = false;
+      if (e.key === ' ') isJumping.current = false;
     };
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
@@ -46,131 +42,141 @@ export default function PlayerKart({ registerOrbs, sampledPoints }) {
     };
   }, []);
 
-  const progress = useRef(0);
+  const forward = useMemo(() => new THREE.Vector3(), []);
+  const right = useMemo(() => new THREE.Vector3(), []);
+  const desiredCamPos = useMemo(() => new THREE.Vector3(), []);
+  const euler = useMemo(() => new THREE.Euler(), []);
+  const quat = useMemo(() => new THREE.Quaternion(), []);
+  const impulse = useMemo(() => new THREE.Vector3(), []);
+
+  const handleInput = (delta, rigidBody) => {
+    const currentQuat = rigidBody.rotation();
+
+    // Apply yaw rotation directly
+    const steerSpeed = 2.5; // radians/sec
+    if (keys.current['a']) yawRef.current += steerSpeed * delta;
+    if (keys.current['d']) yawRef.current -= steerSpeed * delta;
+
+    euler.set(0, yawRef.current, 0);
+    quat.setFromEuler(euler);
+    rigidBody.setRotation(quat, true);
+
+    // Optional: slight side nudge to simulate lean
+    const steerAmount = keys.current['a'] ? 1 : keys.current['d'] ? -1 : 0;
+    if (steerAmount !== 0) {
+      right.set(1, 0, 0).applyQuaternion(quat);
+      rigidBody.applyImpulse(right.multiplyScalar(steerAmount * 0.2 * delta), true);
+    }
+
+    // Update forward impulse
+    impulse.set(0, 0, 0);
+    if (keys.current['w']) {
+      forward.set(0, 0, -1).applyQuaternion(quat);
+      impulse.copy(forward).multiplyScalar(35 * delta);
+    }
+    if (keys.current['s']) {
+      forward.set(0, 0, 1).applyQuaternion(quat);
+      impulse.copy(forward).multiplyScalar(25 * delta);
+    }
+    rigidBody.applyImpulse(impulse, true);
+
+    // Jump
+    if (keys.current[' '] && !isJumping.current) {
+      isJumping.current = true;
+      rigidBody.applyImpulse({ x: 0, y: 10, z: 0 }, true);
+    }
+
+    // Boost
+    if (keys.current['b'] && !isBoosting.current) {
+      isBoosting.current = true;
+      boostTime.current = 2;
+      forward.set(0, 0, -1).applyQuaternion(quat);
+      rigidBody.applyImpulse(forward.clone().multiplyScalar(60), true);
+    }
+
+    if (isBoosting.current) {
+      boostTime.current -= delta;
+      if (boostTime.current <= 0) isBoosting.current = false;
+    }
+
+    if (keys.current['n'] && !specialUsed.current) {
+      specialUsed.current = true;
+      console.log("Special move activated!");
+    }
+  };
 
   useFrame((state, delta) => {
     const rigidBody = kartRef.current;
     const camera = state.camera;
     if (!rigidBody || !camera) return;
-  
-    // Control movement
-    if (keys.current['w']) speed.current = Math.min(speed.current + 15 * delta, 20);
-    else if (keys.current['s']) speed.current = Math.max(speed.current - 15 * delta, -5);
-    else speed.current = Math.max(speed.current - 8 * delta, 0);
-  
-    if (keys.current['a']) rotation.current += 2.5 * delta;
-    if (keys.current['d']) rotation.current -= 2.5 * delta;
-  
-    // Boost
-    if (keys.current['b'] && !isBoosting.current) {
-      isBoosting.current = true;
-      boostTime.current = 2;
-      speed.current = Math.min(speed.current + 10, 30);
+
+    const pos = rigidBody.translation();
+    const rot = rigidBody.rotation();
+
+    const currentPos = new THREE.Vector3(pos.x, pos.y, pos.z);
+    const currentQuat = new THREE.Quaternion(rot.x, rot.y, rot.z, rot.w);
+
+    if (meshRef.current) {
+      const visualEuler = new THREE.Euler().setFromQuaternion(currentQuat);
+      meshRef.current.rotation.copy(visualEuler);
     }
-    if (isBoosting.current) {
-      boostTime.current -= delta;
-      if (boostTime.current <= 0) isBoosting.current = false;
+
+    if (currentPos.y < -5 && !falling) {
+      setFalling(true);
+      fallTimer.current = 1;
     }
-  
-    // Jump
-    if (keys.current[' '] && !isJumping.current) {
-      isJumping.current = true;
+
+    if (falling) {
+      fallTimer.current -= delta;
+      if (fallTimer.current <= 0) {
+        const closest = checkpoints.reduce((nearest, point) => {
+          const dist = currentPos.distanceTo(point);
+          return dist < currentPos.distanceTo(nearest) ? point : nearest;
+        }, checkpoints[0] || new THREE.Vector3(0, 2, 0));
+
+        rigidBody.setTranslation(closest, true);
+        rigidBody.setLinvel({ x: 0, y: 0, z: 0 }, true);
+        rigidBody.setAngvel({ x: 0, y: 0, z: 0 }, true);
+        yawRef.current = 0;
+        setFalling(false);
+      }
+      return;
     }
-  
-    // Special ability
-    if (keys.current['n'] && !specialUsed.current) {
-      specialUsed.current = true;
-      console.log("Special move activated!");
-    }
-  
-    // Calculate movement
-    const forward = new THREE.Vector3(Math.sin(rotation.current), 0, Math.cos(rotation.current));
-    const moveDelta = forward.clone().multiplyScalar(speed.current * delta);
-    const currentPos = rigidBody.translation();
-  
-    const nextPos = {
-      x: currentPos.x + moveDelta.x,
-      y: currentPos.y,
-      z: currentPos.z + moveDelta.z,
-    };
-  
-    // ✅ Raycast hover + tilt (no sampledPoints check)
-    if (world) {
-      const rayStart = new THREE.Vector3(currentPos.x, currentPos.y + 1, currentPos.z);
-      const rayDir = new THREE.Vector3(0, -1, 0);
-  
-      const rayHit = world.castRay({ origin: rayStart, dir: rayDir }, 2, true);
-  
-      if (rayHit && rayHit.toi !== undefined) {
-        const surfaceNormal = new THREE.Vector3(rayHit.normal.x, rayHit.normal.y, rayHit.normal.z).normalize();
-        const targetY = rayStart.y - rayHit.toi + 0.3; // hover height above surface
-        nextPos.y = THREE.MathUtils.lerp(currentPos.y, targetY, 0.2); // smooth height transition
-  
-        const up = new THREE.Vector3(0, 1, 0);
-        const tiltQuat = new THREE.Quaternion().setFromUnitVectors(up, surfaceNormal);
-        const facingQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, rotation.current, 0));
-        const combinedQuat = facingQuat.clone().multiply(tiltQuat);
-        rigidBody.setNextKinematicRotation(combinedQuat);
+
+    for (let i = 0; i < checkpoints.length; i++) {
+      if (currentPos.distanceTo(checkpoints[i]) < 3) {
+        lastCheckpoint.current = checkpoints[i];
+        break;
       }
     }
-  
-    // Apply position
-    rigidBody.setNextKinematicTranslation(nextPos);
-  
-    // ORB collection
-    orbRefs.current.forEach((orb, i) => {
-      if (!orb || !orb.position) return;
-      const dist = new THREE.Vector3(nextPos.x, nextPos.y, nextPos.z).distanceTo(orb.position);
-      if (dist < 1.5) {
-        orb.visible = false;
-        if (orb.material?.color?.set) orb.material.color.set('red');
-        setTimeout(() => {
-          orb.visible = true;
-          if (orb.material?.color?.set) orb.material.color.set('cyan');
-        }, 5000);
-      }
-    });
-  
-    if (driftBoost.current > 0) {
-      driftBoost.current -= delta;
-      if (driftBoost.current <= 0) driftBoost.current = 0;
-    }
-  
-    // Update camera (no OrbitControls anymore)
-    const camOffset = forward.clone().multiplyScalar(-7); // further back
-    camOffset.y += 4; // higher view
-    const desiredCamPos = new THREE.Vector3(
-      nextPos.x + camOffset.x,
-      nextPos.y + camOffset.y,
-      nextPos.z + camOffset.z
-    );
-  
-    if (shake && shakeTime.current > 0) {
-      desiredCamPos.x += (Math.random() - 0.5) * 0.2;
-      desiredCamPos.y += (Math.random() - 0.5) * 0.2;
-      desiredCamPos.z += (Math.random() - 0.5) * 0.2;
-      shakeTime.current -= delta;
-    } else {
-      setShake(false);
-    }
-  
+
+    handleInput(delta, rigidBody);
+
+    forward.set(0, 0, -1).applyQuaternion(currentQuat);
+    const camOffset = forward.clone().multiplyScalar(-7).setY(4);
+    desiredCamPos.copy(currentPos).add(camOffset);
+
     camera.position.lerp(desiredCamPos, 3 * delta);
-    camera.lookAt(new THREE.Vector3(nextPos.x, nextPos.y, nextPos.z));
+    camera.lookAt(currentPos);
   });
 
   return (
     <RigidBody
       ref={kartRef}
-      type="kinematicPosition"
+      type="dynamic"
       colliders="cuboid"
-      position={[0, 1, 0]}
-      linearDamping={1}
-      angularDamping={1}
+      position={[0, 2, 0]}
+      linearDamping={0.4}
+      angularDamping={0.9}
     >
-      <mesh castShadow receiveShadow>
+      <mesh ref={meshRef} castShadow receiveShadow>
         <boxGeometry args={[1, 0.5, 2]} />
         <meshStandardMaterial color="hotpink" />
       </mesh>
     </RigidBody>
   );
 }
+
+
+
+

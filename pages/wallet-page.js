@@ -1,48 +1,23 @@
-import Image from 'next/image';
-import Link from 'next/link';
-import { useEffect, useState } from 'react';
+// pages/wallet-page.js
 import dynamic from 'next/dynamic';
+import { useEffect, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
 import { WalletProvider, ConnectionProvider } from '@solana/wallet-adapter-react';
 import { PhantomWalletAdapter } from '@solana/wallet-adapter-wallets';
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui';
 import '@solana/wallet-adapter-react-ui/styles.css';
 
+import Image from 'next/image';
+import Link from 'next/link';
+
 const WalletMultiButton = dynamic(
   () => import('@solana/wallet-adapter-react-ui').then(mod => mod.WalletMultiButton),
   { ssr: false }
 );
 
-// Odds reference pulled from homepage
-const oddsMap = {
-  'Nova-13': 5.2,
-  'GlitchFang': 4.8,
-  'Solstice': 6.3,
-  'RazorByte': 4.2,
-  'Aether -X': 9.1,
-  'ScrapDrift': 7.4,
-  'Zosi': 5.9,
-  'Ignis Vyre': 6.0,
-  'Blizzard.EXE': 3.7,
-  'Venoma': 8.5,
-  'Spark': 5.6,
-  'Eclipse.9': 3.2
-};
+const wallets = [new PhantomWalletAdapter()];
 
-export default function WalletPageWrapper() {
-  const wallets = [new PhantomWalletAdapter()];
-  return (
-    <ConnectionProvider endpoint="https://api.mainnet-beta.solana.com">
-      <WalletProvider wallets={wallets} autoConnect>
-        <WalletModalProvider>
-          <WalletPage />
-        </WalletModalProvider>
-      </WalletProvider>
-    </ConnectionProvider>
-  );
-}
-
-function WalletPage() {
+function WalletPageContent() {
   const wallet = useWallet();
   const [tokens, setTokens] = useState(0);
   const [betHistory, setBetHistory] = useState([]);
@@ -62,17 +37,18 @@ function WalletPage() {
 
   return (
     <div className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-8" style={{ backgroundImage: "url('/background.png')" }}>
+      {/* Menu */}
       <div className="fixed top-6 left-6 flex flex-col w-fit z-50 bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 space-y-2">
-  <Link href="/your-racerz" className="menu-link">🎮 Your Racerz</Link>
-  <Link href="/" className="menu-link">🏁 Shop</Link>
-  <Link href="/weather-forecast" className="menu-link">⛈ Weather</Link>
-  <Link href="/interactions" className="menu-link">🤖 Interact</Link>
-  <Link href="/wallet-page" className="menu-link">💰 Wallet</Link>
-  <Link href="/weekly-messages" className="menu-link">📈 Weekly Announcements</Link>
-  <Link href="/race-simulator" className="menu-link">🎮 Race Simulator</Link>
-  
-</div>
+        <Link href="/" className="menu-link">🏁 Home</Link>
+        <Link href="/your-racerz" className="menu-link">🎮 Inventory</Link>
+        <Link href="/weather-forecast" className="menu-link">⛈ Weather</Link>
+        <Link href="/interactions" className="menu-link">🤖 Interact</Link>
+        <Link href="/wallet-page" className="menu-link">💰 Wallet</Link>
+        <Link href="/weekly-messages" className="menu-link">📈 Weekly Announcements</Link>
+        <Link href="/race-simulator" className="menu-link">🎮 Race Simulator</Link>
+      </div>
 
+      {/* Page Content */}
       <div className="flex justify-between items-start mb-10">
         <h1 className="w-full text-center text-4xl md:text-6xl font-extrabold tracking-tight arcade-text">
           YOUR WALLET
@@ -96,10 +72,10 @@ function WalletPage() {
                 key={i}
                 className="bg-purple-800 bg-opacity-60 text-white p-4 rounded-xl max-w-md w-full text-left"
               >
-                <div>🐎 Bet on <strong>{entry.name}</strong> @ <strong>{entry.odds || oddsMap[entry.name]}x</strong></div>
+                <div>🐎 Bet on <strong>{entry.name}</strong> @ <strong>{entry.odds}</strong>x</div>
                 <div>🕒 Time: {entry.timestamp}</div>
                 <div className="text-yellow-400 font-bold">
-                  🎯 Expected Payout: {(10 * (parseFloat(entry.odds) || oddsMap[entry.name])).toFixed(2)} $PUNK
+                  🎯 Expected Payout: {(10 * parseFloat(entry.odds)).toFixed(2)} $PUNK
                 </div>
               </li>
             ))}
@@ -112,30 +88,20 @@ function WalletPage() {
       <div className="mt-10 text-center">
         <WalletMultiButton className="!bg-purple-600 hover:!bg-purple-700" />
       </div>
-
-      <style jsx>{`
-        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
-        .arcade-text {
-          font-family: 'Press Start 2P', monospace;
-          color: #00ffff;
-          text-shadow: 0 0 6px #0ff, 0 0 12px #f0f;
-        }
-        .panel-link {
-          display: block;
-          background: rgba(255, 255, 255, 0.05);
-          padding: 0.75rem 1.5rem;
-          border: 1px solid rgba(255, 255, 255, 0.1);
-          color: white;
-          font-family: 'Share Tech Mono', monospace;
-          font-weight: bold;
-          text-align: left;
-          transition: all 0.2s ease-in-out;
-        }
-        .panel-link:hover {
-          background: rgba(255, 255, 255, 0.12);
-          transform: translateX(4px);
-        }
-      `}</style>
     </div>
   );
 }
+
+// ✅ Export this so Next.js recognizes it as a page
+export default function WalletPage() {
+  return (
+    <ConnectionProvider endpoint="https://api.mainnet-beta.solana.com">
+      <WalletProvider wallets={wallets} autoConnect>
+        <WalletModalProvider>
+          <WalletPageContent />
+        </WalletModalProvider>
+      </WalletProvider>
+    </ConnectionProvider>
+  );
+}
+

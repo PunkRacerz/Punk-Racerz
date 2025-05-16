@@ -61,8 +61,8 @@ export default function RaceSimulatorPage() {
       </Canvas>
 
       <div className="fixed top-6 left-6 flex flex-col w-fit z-50 bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 space-y-2">
-  <Link href="/your-racerz" className="menu-link">🎮 Your Racerz</Link>
-  <Link href="/" className="menu-link">🏁 Shop</Link>
+  <Link href="/" className="menu-link">🏁 Home</Link>
+  <Link href="/your-racerz" className="menu-link">🎮 Inventory</Link>
   <Link href="/weather-forecast" className="menu-link">⛈ Weather</Link>
   <Link href="/interactions" className="menu-link">🤖 Interact</Link>
   <Link href="/wallet-page" className="menu-link">💰 Wallet</Link>

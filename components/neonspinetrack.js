@@ -1,53 +1,73 @@
 import { useMemo, useState, useRef, useEffect } from 'react';
-import { Vector3, CatmullRomCurve3, Shape, ExtrudeGeometry } from 'three';
+import { Vector3, CatmullRomCurve3, TubeGeometry } from 'three';
 import pointsData from '../data/trackPoints.json';
-import { useLoader } from '@react-three/fiber';
 import { RigidBody } from '@react-three/rapier';
 import * as THREE from 'three';
 
-export function NeonSpineTrack({ registerOrbs }) {
-  const elevatedPoints = pointsData.trackPoints.map(([x, y, z], i) => {
+export function NeonSpineTrack({ registerOrbs, registerTrack }) {
+  const elevatedPoints = pointsData.trackPoints.map((p, i) => {
+    const [x, y, z] = Array.isArray(p) ? p : [p.x, p.y, p.z];
     const newY = (i >= 12 && i <= 16) ? y + 2 : y;
-    return [x, newY, z];
+    return new Vector3(x * 2, newY * 1.2, z * 2);
   });
 
-  const safeRawPoints = elevatedPoints
-    .filter(([x, y, z]) => isFinite(x) && isFinite(y) && isFinite(z))
-    .map(([x, y, z]) => new Vector3(x * 2, y * 1.2, z * 2));
-
-    const curve = useMemo(() => {
-      return new CatmullRomCurve3(safeRawPoints, true, 'catmullrom', 0.75);
-    }, [safeRawPoints]);
+  const curve = useMemo(() => {
+    return new CatmullRomCurve3(elevatedPoints, true, 'catmullrom', 0.75);
+  }, [elevatedPoints]);
 
   const spacedPoints = useMemo(() => {
-  if (!curve) return [];
-  return curve.getSpacedPoints(100);
-}, [curve]);
+    return curve.getSpacedPoints(200);
+  }, [curve]);
 
-const trackGeometry = useMemo(() => {
-  if (!curve) return null;
+  useEffect(() => {
+    window.sampledTrackPoints = spacedPoints.map(p => ({ x: p.x, y: p.y, z: p.z }));
+  }, [spacedPoints]);
 
-  const shape = new Shape();
-  shape.moveTo(-1, 5);      // x, z
-  shape.lineTo(-1, 10);      
-  shape.lineTo(2.5, 10);
-  shape.lineTo(2.5, 10);
-  shape.lineTo(-1, 0);
+  const trackGeometry = useMemo(() => {
+    const frames = curve.computeFrenetFrames(200, true);
+    const positions = [];
+    const normals = [];
+    const width = 20;
 
-  const geometry = new ExtrudeGeometry(shape, {
-    steps: 200,
-    extrudePath: curve,
-    bevelEnabled: false,
-  });
+    for (let i = 0; i < frames.tangents.length; i++) {
+      const point = curve.getPointAt(i / (frames.tangents.length - 1));
+      const normal = frames.normals[i];
+      const binormal = frames.binormals[i];
 
-  return geometry;
-}, [curve]);
+      const offset = binormal.clone().normalize().multiplyScalar(width / 2);
+      const left = point.clone().sub(offset);
+      const right = point.clone().add(offset);
+
+      positions.push(left.x, left.y, left.z);
+      positions.push(right.x, right.y, right.z);
+
+      normals.push(normal.x, normal.y, normal.z);
+      normals.push(normal.x, normal.y, normal.z);
+    }
+
+    const geometry = new THREE.BufferGeometry();
+    geometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+    geometry.setAttribute('normal', new THREE.Float32BufferAttribute(normals, 3));
+
+    const indices = [];
+    for (let i = 0; i < frames.tangents.length - 1; i++) {
+      const a = i * 2;
+      const b = i * 2 + 1;
+      const c = i * 2 + 2;
+      const d = i * 2 + 3;
+      indices.push(a, b, d);
+      indices.push(a, d, c);
+    }
+    geometry.setIndex(indices);
+    geometry.computeVertexNormals();
+    return geometry;
+  }, [curve]);
 
   const trackMaterial = useMemo(() => new THREE.MeshStandardMaterial({
-    color: '#444',               // simple diffuse color
-    metalness: 0.05,             // subtle metallic look
-    roughness: 0.85,             // matte finish
-    side: THREE.DoubleSide,      // ensure both sides are visible
+    color: '#444',
+    metalness: 0.05,
+    roughness: 0.85,
+    side: THREE.DoubleSide,
   }), []);
 
   const [orbStatus, setOrbStatus] = useState(Array(25).fill(true));
@@ -63,25 +83,37 @@ const trackGeometry = useMemo(() => {
     }
   }, [orbStatus, registerOrbs]);
 
+  const trackRef = useRef();
+
+  useEffect(() => {
+    if (typeof registerTrack === 'function') {
+      registerTrack(trackRef);
+    }
+  }, [registerTrack]);
+
+  // Removed trackColliders: replaced with accurate trimesh collider on visual mesh
+
   return (
     <group>
-      <line>
-        <bufferGeometry attach="geometry" setFromPoints={spacedPoints} />
-        <lineBasicMaterial attach="material" color="yellow" linewidth={2} />
-      </line>
-  
+      {/* Debug mesh ribbon to visualize center of the track */}
+      <mesh castShadow receiveShadow>
+        <tubeGeometry args={[curve, 200, 0.1, 2, true]} />
+        <meshBasicMaterial color="yellow" />
+      </mesh>
+
       {trackGeometry && (
-        <RigidBody type="fixed" colliders="trimesh">
+        <RigidBody ref={trackRef} type="fixed" colliders="trimesh">
           <mesh geometry={trackGeometry} castShadow receiveShadow material={trackMaterial} />
         </RigidBody>
-      )}
+      )
+      }
 
       {orbStatus.map((active, idx) => {
         const baseIdx = Math.floor((idx / orbStatus.length) * spacedPoints.length);
         const point = spacedPoints[baseIdx];
         if (!point) return null;
 
-        const orbPos = point.clone().add(new Vector3((idx % 5 - 2) * 1.8, 0.8, 0));
+        const orbPos = point.clone().add(new Vector3((idx % 5 - 2) * 1.8, 1.2, 0));
         return (
           <group key={`orb-${idx}`} position={[orbPos.x, orbPos.y, orbPos.z]}>
             <mesh
@@ -141,4 +173,7 @@ function CityBackground() {
 }
 
 export default CityBackground;
+
+
+
 
