@@ -5,10 +5,9 @@ import { RigidBody } from '@react-three/rapier';
 import * as THREE from 'three';
 
 export function NeonSpineTrack({ registerOrbs, registerTrack }) {
-  const elevatedPoints = pointsData.trackPoints.map((p, i) => {
+  const elevatedPoints = pointsData.trackPoints.map((p) => {
     const [x, y, z] = Array.isArray(p) ? p : [p.x, p.y, p.z];
-    const newY = (i >= 12 && i <= 16) ? y + 2 : y;
-    return new Vector3(x * 2, newY * 1.2, z * 2);
+    return new Vector3(x * 2, y * 1, z * 2);
   });
 
   const curve = useMemo(() => {
@@ -16,7 +15,7 @@ export function NeonSpineTrack({ registerOrbs, registerTrack }) {
   }, [elevatedPoints]);
 
   const spacedPoints = useMemo(() => {
-    return curve.getSpacedPoints(200);
+    return curve.getSpacedPoints(100);
   }, [curve]);
 
   useEffect(() => {
@@ -24,7 +23,7 @@ export function NeonSpineTrack({ registerOrbs, registerTrack }) {
   }, [spacedPoints]);
 
   const trackGeometry = useMemo(() => {
-    const frames = curve.computeFrenetFrames(200, true);
+    const frames = curve.computeFrenetFrames(50, true);
     const positions = [];
     const normals = [];
     const width = 20;
@@ -60,8 +59,14 @@ export function NeonSpineTrack({ registerOrbs, registerTrack }) {
     }
     geometry.setIndex(indices);
     geometry.computeVertexNormals();
+    geometry.computeBoundingBox();
+    geometry.computeBoundingSphere();
     return geometry;
   }, [curve]);
+
+  const debugCurve = useMemo(() => {
+    return new CatmullRomCurve3(spacedPoints, true, 'catmullrom', 0.75);
+  }, [spacedPoints]);
 
   const trackMaterial = useMemo(() => new THREE.MeshStandardMaterial({
     color: '#444',
@@ -91,22 +96,19 @@ export function NeonSpineTrack({ registerOrbs, registerTrack }) {
     }
   }, [registerTrack]);
 
-  // Removed trackColliders: replaced with accurate trimesh collider on visual mesh
-
   return (
     <group>
       {/* Debug mesh ribbon to visualize center of the track */}
       <mesh castShadow receiveShadow>
-        <tubeGeometry args={[curve, 200, 0.1, 2, true]} />
+        <tubeGeometry args={[debugCurve, 100, 0.3, 3, true]} />
         <meshBasicMaterial color="yellow" />
       </mesh>
 
       {trackGeometry && (
-        <RigidBody ref={trackRef} type="fixed" colliders="trimesh">
+        <RigidBody key={trackGeometry.uuid} ref={trackRef} type="fixed" colliders="trimesh">
           <mesh geometry={trackGeometry} castShadow receiveShadow material={trackMaterial} />
         </RigidBody>
-      )
-      }
+      )}
 
       {orbStatus.map((active, idx) => {
         const baseIdx = Math.floor((idx / orbStatus.length) * spacedPoints.length);

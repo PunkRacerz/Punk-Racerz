@@ -1,0 +1,59 @@
+.hud-container {
+    position: fixed;
+    bottom: 24px;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding: 0 40px;
+    z-index: 50;
+    pointer-events: none;
+    font-family: 'Share Tech Mono', monospace;
+  }
+  
+  .hud-speed {
+    font-size: 2rem;
+    color: #00ffff;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 10px 20px;
+    border-radius: 10px;
+    pointer-events: none;
+    box-shadow: 0 0 8px #00ffff;
+  }
+  
+  .hud-inventory {
+    display: flex;
+    gap: 20px;
+    pointer-events: none;
+    justify-content: center;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+  
+  .hud-slot {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+  }
+  
+  .hud-slot img {
+    max-width: 80%;
+    max-height: 80%;
+  }
+  
+  .empty-slot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+  }
+  

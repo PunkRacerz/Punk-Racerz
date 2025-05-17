@@ -2,12 +2,16 @@ import { useState, useRef, Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { NeonSpineTrack } from '@/components/neonspinetrack';
 import PlayerKart from '@/components/playerkart';
+import HUD from '@/components/HUD';
 import Link from 'next/link';
 import { Physics } from '@react-three/rapier';
+import { Stars } from '@react-three/drei';
 
 export default function RaceSimulatorPage() {
   const [started, setStarted] = useState(false);
   const [trackPoints, setTrackPoints] = useState([]);
+  const [speed, setSpeed] = useState(0);
+  const [inventory, setInventory] = useState([null, null, null]);
 
   const orbRefs = useRef([]);
   const orbCallback = useRef(null);
@@ -52,24 +56,27 @@ export default function RaceSimulatorPage() {
           color="#ffffff"
         />
 
+<Stars radius={300} depth={150} count={8000} factor={4} saturation={0} fade />
+
         <Suspense fallback={null}>
           <Physics debug gravity={[0, -9.81, 0]}>
-          <NeonSpineTrack registerOrbs={registerOrbs} onSampledPoints={setTrackPoints} />
-          <PlayerKart registerOrbs={registerOrbs} sampledPoints={trackPoints} />
+            <NeonSpineTrack registerOrbs={registerOrbs} onSampledPoints={setTrackPoints} />
+            <PlayerKart registerOrbs={registerOrbs} sampledPoints={trackPoints} setSpeed={setSpeed} />
           </Physics>
         </Suspense>
       </Canvas>
 
+      <HUD speed={speed} inventory={inventory} />
+
       <div className="fixed top-6 left-6 flex flex-col w-fit z-50 bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 space-y-2">
-  <Link href="/" className="menu-link">🏁 Home</Link>
-  <Link href="/your-racerz" className="menu-link">🎮 Inventory</Link>
-  <Link href="/weather-forecast" className="menu-link">⛈ Weather</Link>
-  <Link href="/interactions" className="menu-link">🤖 Interact</Link>
-  <Link href="/wallet-page" className="menu-link">💰 Wallet</Link>
-  <Link href="/weekly-messages" className="menu-link">📈 Weekly Announcements</Link>
-  <Link href="/race-simulator" className="menu-link">🎮 Race Simulator</Link>
-  
-</div>
+        <Link href="/" className="menu-link">🏁 Home</Link>
+        <Link href="/your-racerz" className="menu-link">🎮 Inventory</Link>
+        <Link href="/weather-forecast" className="menu-link">⛈ Weather</Link>
+        <Link href="/interactions" className="menu-link">🤖 Interact</Link>
+        <Link href="/wallet-page" className="menu-link">💰 Wallet</Link>
+        <Link href="/weekly-messages" className="menu-link">📈 Weekly Announcements</Link>
+        <Link href="/race-simulator" className="menu-link">🎮 Race Simulator</Link>
+      </div>
 
       <style jsx>{`
         .arcade-text {

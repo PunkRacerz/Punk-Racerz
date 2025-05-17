@@ -1,9 +1,12 @@
 import { useRef, useEffect, useState, useMemo } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
-import { RigidBody } from '@react-three/rapier';
+import { RigidBody, CapsuleCollider } from '@react-three/rapier';
 
-export default function PlayerKart({ sampledPoints }) {
+
+
+export default function PlayerKart({ sampledPoints, registerOrbs, setSpeed }) {
+
   const kartRef = useRef();
   const meshRef = useRef();
   const keys = useRef({});
@@ -61,37 +64,33 @@ export default function PlayerKart({ sampledPoints }) {
     quat.setFromEuler(euler);
     rigidBody.setRotation(quat, true);
 
-    // Optional: slight side nudge to simulate lean
     const steerAmount = keys.current['a'] ? 1 : keys.current['d'] ? -1 : 0;
     if (steerAmount !== 0) {
       right.set(1, 0, 0).applyQuaternion(quat);
       rigidBody.applyImpulse(right.multiplyScalar(steerAmount * 0.2 * delta), true);
     }
 
-    // Update forward impulse
     impulse.set(0, 0, 0);
     if (keys.current['w']) {
       forward.set(0, 0, -1).applyQuaternion(quat);
-      impulse.copy(forward).multiplyScalar(35 * delta);
+      impulse.copy(forward).multiplyScalar(80 * delta);
     }
     if (keys.current['s']) {
       forward.set(0, 0, 1).applyQuaternion(quat);
-      impulse.copy(forward).multiplyScalar(25 * delta);
+      impulse.copy(forward).multiplyScalar(20 * delta);
     }
     rigidBody.applyImpulse(impulse, true);
 
-    // Jump
     if (keys.current[' '] && !isJumping.current) {
       isJumping.current = true;
       rigidBody.applyImpulse({ x: 0, y: 10, z: 0 }, true);
     }
 
-    // Boost
     if (keys.current['b'] && !isBoosting.current) {
       isBoosting.current = true;
       boostTime.current = 2;
       forward.set(0, 0, -1).applyQuaternion(quat);
-      rigidBody.applyImpulse(forward.clone().multiplyScalar(60), true);
+      rigidBody.applyImpulse(forward.clone().multiplyScalar(90), true);
     }
 
     if (isBoosting.current) {
@@ -106,6 +105,9 @@ export default function PlayerKart({ sampledPoints }) {
   };
 
   useFrame((state, delta) => {
+    const velocity = kartRef.current?.linvel();
+    const speed = velocity ? Math.sqrt(velocity.x ** 2 + velocity.y ** 2 + velocity.z ** 2) : 0;
+    setSpeed?.(speed);
     const rigidBody = kartRef.current;
     const camera = state.camera;
     if (!rigidBody || !camera) return;
@@ -116,9 +118,29 @@ export default function PlayerKart({ sampledPoints }) {
     const currentPos = new THREE.Vector3(pos.x, pos.y, pos.z);
     const currentQuat = new THREE.Quaternion(rot.x, rot.y, rot.z, rot.w);
 
-    if (meshRef.current) {
-      const visualEuler = new THREE.Euler().setFromQuaternion(currentQuat);
-      meshRef.current.rotation.copy(visualEuler);
+    if (meshRef.current && sampledPoints?.length > 2) {
+      const closestIndex = sampledPoints.reduce((closestIdx, pt, idx) => {
+        const dist = currentPos.distanceToSquared(new THREE.Vector3(pt.x, pt.y, pt.z));
+        const closestDist = currentPos.distanceToSquared(new THREE.Vector3(sampledPoints[closestIdx].x, sampledPoints[closestIdx].y, sampledPoints[closestIdx].z));
+        return dist < closestDist ? idx : closestIdx;
+      }, 0);
+
+      const behind = sampledPoints[Math.max(closestIndex - 1, 0)];
+      const ahead = sampledPoints[Math.min(closestIndex + 1, sampledPoints.length - 1)];
+
+      const slopeVec = new THREE.Vector3().subVectors(
+        new THREE.Vector3(ahead.x, ahead.y, ahead.z),
+        new THREE.Vector3(behind.x, behind.y, behind.z)
+      ).normalize();
+
+      const up = new THREE.Vector3(0, 1, 0);
+      const right = new THREE.Vector3().crossVectors(up, slopeVec).normalize();
+      const newUp = new THREE.Vector3().crossVectors(slopeVec, right).normalize();
+
+      const mat4 = new THREE.Matrix4().makeBasis(right, newUp, slopeVec);
+      const slopeQuat = new THREE.Quaternion().setFromRotationMatrix(mat4);
+
+      meshRef.current.quaternion.slerp(slopeQuat, 10 * delta);
     }
 
     if (currentPos.y < -5 && !falling) {
@@ -152,11 +174,51 @@ export default function PlayerKart({ sampledPoints }) {
 
     handleInput(delta, rigidBody);
 
-    forward.set(0, 0, -1).applyQuaternion(currentQuat);
-    const camOffset = forward.clone().multiplyScalar(-7).setY(4);
+    // Clamp angular velocity to reduce spin jitter
+    const angVel = rigidBody.angvel();
+    rigidBody.setAngvel({
+      x: THREE.MathUtils.clamp(angVel.x, -1.5, 1.5),
+      y: angVel.y,
+      z: THREE.MathUtils.clamp(angVel.z, -1.5, 1.5),
+    }, true);
+
+    // Apply slopeQuat to rigidBody if available
+    if (sampledPoints?.length > 2) {
+      const closestIndex = sampledPoints.reduce((closestIdx, pt, idx) => {
+        const dist = currentPos.distanceToSquared(new THREE.Vector3(pt.x, pt.y, pt.z));
+        const closestDist = currentPos.distanceToSquared(new THREE.Vector3(sampledPoints[closestIdx].x, sampledPoints[closestIdx].y, sampledPoints[closestIdx].z));
+        return dist < closestDist ? idx : closestIdx;
+      }, 0);
+
+      const behind = sampledPoints[Math.max(closestIndex - 1, 0)];
+      const ahead = sampledPoints[Math.min(closestIndex + 1, sampledPoints.length - 1)];
+
+      const slopeVec = new THREE.Vector3().subVectors(
+        new THREE.Vector3(ahead.x, ahead.y, ahead.z),
+        new THREE.Vector3(behind.x, behind.y, behind.z)
+      ).normalize();
+
+      const up = new THREE.Vector3(0, 1, 0);
+      const right = new THREE.Vector3().crossVectors(up, slopeVec).normalize();
+      const newUp = new THREE.Vector3().crossVectors(slopeVec, right).normalize();
+
+      const mat4 = new THREE.Matrix4().makeBasis(right, newUp, slopeVec);
+      const slopeQuat = new THREE.Quaternion().setFromRotationMatrix(mat4);
+
+      // rigidBody.setRotation(slopeQuat, true); // Disabled to avoid physics conflicts
+    }
+
+    const camEuler = new THREE.Euler().setFromQuaternion(currentQuat, 'YXZ');
+    const yawOnlyQuat = new THREE.Quaternion().setFromEuler(new THREE.Euler(0, camEuler.y, 0));
+
+    // Offset behind the kart using yaw-only quaternion
+    const camOffset = new THREE.Vector3(0, 4, 10).applyQuaternion(yawOnlyQuat);
     desiredCamPos.copy(currentPos).add(camOffset);
 
-    camera.position.lerp(desiredCamPos, 3 * delta);
+    // Smoothly follow position
+    camera.position.lerp(desiredCamPos, 5 * delta);
+
+    // Always look at the kart
     camera.lookAt(currentPos);
   });
 
@@ -164,18 +226,19 @@ export default function PlayerKart({ sampledPoints }) {
     <RigidBody
       ref={kartRef}
       type="dynamic"
-      colliders="cuboid"
-      position={[0, 2, 0]}
+      position={[0, 4, 0]}
       linearDamping={0.4}
       angularDamping={0.9}
     >
+      <CapsuleCollider args={[0.25, 0.75]} />
       <mesh ref={meshRef} castShadow receiveShadow>
-        <boxGeometry args={[1, 0.5, 2]} />
+        <boxGeometry args={[1, 1.5, 2]} />
         <meshStandardMaterial color="hotpink" />
       </mesh>
     </RigidBody>
   );
 }
+
 
 
 

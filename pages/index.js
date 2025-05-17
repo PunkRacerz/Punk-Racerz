@@ -65,16 +65,18 @@ export default function CharacterShop() {
   };
 
   return (
-    <div className="shop-page">
-      <div className="fixed top-6 left-6 flex flex-col w-fit z-50 bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 space-y-2">
+   <>
+      <div className="fixed top-0 left-0 w-screen h-screen -z-10 bg-cover bg-center" style={{ backgroundImage: 'url(/background2.png)' }}></div>
+      <nav className="w-full p-4 bg-black/30 backdrop-blur-md text-white flex justify-center gap-6 text-sm font-medium border-b border-pink-500 shadow-md">
+      <Link href="/" className="menu-link">🏁 Home</Link>
   <Link href="/your-racerz" className="menu-link">🎮 Inventory</Link>
-  <Link href="/" className="menu-link">🏁 Home</Link>
+  <Link href="/punkx">PunkX</Link>
   <Link href="/weather-forecast" className="menu-link">⛈ Weather</Link>
   <Link href="/interactions" className="menu-link">🤖 Interact</Link>
   <Link href="/wallet-page" className="menu-link">💰 Wallet</Link>
   <Link href="/weekly-messages" className="menu-link">📈 Weekly Announcements</Link>
   <Link href="/race-simulator" className="menu-link">🎮 Race Simulator</Link>
-      </div>
+      </nav>
 
       <div className="pt-20">
         <div className="text-center mb-4">
@@ -127,6 +129,7 @@ export default function CharacterShop() {
           padding: 0;
         }
       `}</style>
-    </div>
+    </>
   );
 }
+
