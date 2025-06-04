@@ -1,29 +1,28 @@
-import { useMemo, useState, useRef, useEffect } from 'react';
+import { useMemo, useState, useRef, useEffect, useCallback } from 'react';
 import { Vector3, CatmullRomCurve3, TubeGeometry } from 'three';
 import pointsData from '../data/trackPoints.json';
 import { RigidBody } from '@react-three/rapier';
 import * as THREE from 'three';
+import FinishLineTrigger from '@/components/FinishLineTrigger';
 
-export function NeonSpineTrack({ registerOrbs, registerTrack }) {
-  const elevatedPoints = pointsData.trackPoints.map((p) => {
+export default function NeonSpineTrack({ registerOrbs, registerTrack, onSampledPoints, onLap }) {
+  const elevatedPoints = useMemo(() => pointsData.points.map((p) => {
     const [x, y, z] = Array.isArray(p) ? p : [p.x, p.y, p.z];
     return new Vector3(x * 2, y * 1, z * 2);
-  });
+  }), []);
 
-  const curve = useMemo(() => {
-    return new CatmullRomCurve3(elevatedPoints, true, 'catmullrom', 0.75);
-  }, [elevatedPoints]);
+  const curve = useMemo(() => new CatmullRomCurve3(elevatedPoints, true, 'catmullrom', 0.75), [elevatedPoints]);
 
-  const spacedPoints = useMemo(() => {
-    return curve.getSpacedPoints(100);
-  }, [curve]);
+  const spacedPoints = useMemo(() => curve.getSpacedPoints(400), [curve]);
+
+  const trackWidth = 22;
 
   useEffect(() => {
     window.sampledTrackPoints = spacedPoints.map(p => ({ x: p.x, y: p.y, z: p.z }));
   }, [spacedPoints]);
 
   const trackGeometry = useMemo(() => {
-    const frames = curve.computeFrenetFrames(50, true);
+    const frames = curve.computeFrenetFrames(90, true);
     const positions = [];
     const normals = [];
     const width = 20;
@@ -64,9 +63,7 @@ export function NeonSpineTrack({ registerOrbs, registerTrack }) {
     return geometry;
   }, [curve]);
 
-  const debugCurve = useMemo(() => {
-    return new CatmullRomCurve3(spacedPoints, true, 'catmullrom', 0.75);
-  }, [spacedPoints]);
+  const debugCurve = useMemo(() => new CatmullRomCurve3(spacedPoints, true, 'catmullrom', 0.75), [spacedPoints]);
 
   const trackMaterial = useMemo(() => new THREE.MeshStandardMaterial({
     color: '#444',
@@ -77,6 +74,7 @@ export function NeonSpineTrack({ registerOrbs, registerTrack }) {
 
   const [orbStatus, setOrbStatus] = useState(Array(25).fill(true));
   const orbRefs = useRef([]);
+  const sentSamplePoints = useRef(false);
 
   useEffect(() => {
     if (
@@ -91,14 +89,15 @@ export function NeonSpineTrack({ registerOrbs, registerTrack }) {
   const trackRef = useRef();
 
   useEffect(() => {
-    if (typeof registerTrack === 'function') {
-      registerTrack(trackRef);
+    if (!sentSamplePoints.current && typeof onSampledPoints === 'function') {
+      console.log("📤 NeonSpineTrack: Calling onSampledPoints");
+      onSampledPoints(spacedPoints);
+      sentSamplePoints.current = true;
     }
-  }, [registerTrack]);
+  }, [onSampledPoints, spacedPoints]);
 
   return (
     <group>
-      {/* Debug mesh ribbon to visualize center of the track */}
       <mesh castShadow receiveShadow>
         <tubeGeometry args={[debugCurve, 100, 0.3, 3, true]} />
         <meshBasicMaterial color="yellow" />
@@ -110,11 +109,56 @@ export function NeonSpineTrack({ registerOrbs, registerTrack }) {
         </RigidBody>
       )}
 
+      <FinishLineTrigger
+        position={[0, 1, 0]}
+        size={[10, 2, 0.2]}
+        onCross={() => {
+          console.log("🏁 Finish line crossed!");
+          if (typeof onLap === 'function') onLap();
+        }}
+      />
+      {/* ✅ Start/Finish Line Gate */}
+{(() => {
+  const index = pointsData.startIndex || 0;
+  const next = (index + 1) % elevatedPoints.length;
+  const pointA = elevatedPoints[index];
+  const pointB = elevatedPoints[next];
+
+  const direction = new Vector3().subVectors(pointB, pointA).normalize();
+  const up = new Vector3(0, 1, 0);
+  const cross = new Vector3().crossVectors(direction, up).normalize();
+  const gatePos = pointA.clone().add(new Vector3(0, 0, 0));
+  const angle = Math.atan2(cross.x, cross.z);
+
+  const color = "white";
+  const emissive = "#ffffff";
+  const intensity = 2;
+
+  return (
+    <group position={gatePos} rotation={[0, angle, 0]}>
+      <mesh position={[0, 5, 0]}>
+        <boxGeometry args={[trackWidth, 0.6, 0.6]} />
+        <meshStandardMaterial color={color} emissive={emissive} emissiveIntensity={intensity} />
+      </mesh>
+      <mesh position={[-trackWidth / 2 + 0.3, 2.5, 0]}>
+        <boxGeometry args={[0.4, 5, 0.4]} />
+        <meshStandardMaterial color="#222" emissive={emissive} emissiveIntensity={0.5} />
+      </mesh>
+      <mesh position={[trackWidth / 2 - 0.3, 2.5, 0]}>
+        <boxGeometry args={[0.4, 5, 0.4]} />
+        <meshStandardMaterial color="#222" emissive={emissive} emissiveIntensity={0.5} />
+      </mesh>
+    </group>
+  );
+})()}
+
+  
+      {/* ✅ Orbs */}
       {orbStatus.map((active, idx) => {
         const baseIdx = Math.floor((idx / orbStatus.length) * spacedPoints.length);
         const point = spacedPoints[baseIdx];
         if (!point) return null;
-
+  
         const orbPos = point.clone().add(new Vector3((idx % 5 - 2) * 1.8, 1.2, 0));
         return (
           <group key={`orb-${idx}`} position={[orbPos.x, orbPos.y, orbPos.z]}>
@@ -128,10 +172,11 @@ export function NeonSpineTrack({ registerOrbs, registerTrack }) {
           </group>
         );
       })}
-
+  
       <CityBackground />
     </group>
   );
+  
 }
 
 function CityBackground() {
@@ -174,7 +219,8 @@ function CityBackground() {
   );
 }
 
-export default CityBackground;
+
+export { CityBackground };
 
 
 

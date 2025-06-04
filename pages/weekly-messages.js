@@ -5,20 +5,20 @@ import React from 'react';
 
 export default function WeeklyAnnouncements() {
   return (
-    <div className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-8" style={{ backgroundImage: "url('/background.png')" }}>
+    <div className="min-h-screen bg-cover bg-center text-white font-sans px-8 py-15" style={{ backgroundImage: "url('/background2.png')" }}>
       {/* Navigation Menu */}
-    <div className="your-racerz-page">
-      <div className="fixed top-6 left-6 flex flex-col w-fit z-50 bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 space-y-2">
-  <Link href="/" className="menu-link">🏁 Home</Link>
-  <Link href="/your-racerz" className="menu-link">🎮 Inventory</Link>
-  <Link href="/weather-forecast" className="menu-link">⛈ Weather</Link>
-  <Link href="/interactions" className="menu-link">🤖 Interact</Link>
-  <Link href="/wallet-page" className="menu-link">💰 Wallet</Link>
-  <Link href="/weekly-messages" className="menu-link">📈 Weekly Announcements</Link>
-  <Link href="/race-simulator" className="menu-link">🎮 Race Simulator</Link>
+      <div className="fixed top-0 left-0 w-full z-50 bg-black/40 backdrop-blur-md text-white flex justify-between items-center px-8 py-3 text-sm font-medium border-b border-pink-500 shadow-md">
+        <div className="flex gap-6 flex-wrap justify-center w-full">
+          <Link href="/" className="hover:underline">🏁 Home</Link>
+          <Link href="/your-racerz" className="hover:underline">🎮 Inventory</Link>
+          <Link href="/punkx" className="hover:underline">PunkX</Link>
+          <Link href="/weather-forecast" className="hover:underline">⛈ Weather</Link>
+          <Link href="/interactions" className="hover:underline">🤖 Interact</Link>
+          <Link href="/wallet-page" className="hover:underline">💰 Wallet</Link>
+          <Link href="/weekly-messages" className="hover:underline">📈 Weekly Announcements</Link>
+          <Link href="/race-simulator" className="hover:underline">🎮 Race Simulator</Link>
+        </div>
       </div>
-  
-</div>
 
       {/* Announcements Section */}
       <motion.div className="relative z-10"
@@ -26,7 +26,7 @@ export default function WeeklyAnnouncements() {
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
       >
-        <h1 className="text-center text-5xl md:text-6xl font-bold mb-16 text-white tracking-wider" style={{ fontFamily: 'Share Tech Mono, monospace' }}>
+        <h1 className="text-center text-5xl md:text-6xl font-bold 2 mb-16 text-pink-400 tracking-wider" style={{ fontFamily: 'Share Tech Mono, monospace' }}>
           📈 Weekly Announcements
         </h1>
 
@@ -55,10 +55,25 @@ export default function WeeklyAnnouncements() {
             <h2 className="text-3xl font-bold mb-4" style={{ fontFamily: 'Share Tech Mono, monospace' }}>🔥 Upcoming Tournament</h2>
             <p className="text-lg leading-relaxed">
               🚨 ANNOUNCEMENT: Neon Spine Express will host the *first* PunkRacerz Weekly Tournament!  
-              Bet SOL, win custom NFTs, and unlock legendary car skins.  
-              Registration opens this Friday — limited spots available!
+              Bet $SOL/$PNK, win rewards, unlock legendary car skins/lore snapshots.  
+              First Race tonight! Get your bets in! One bet per race.
             </p>
-          </motion.div>
+            </motion.div>
+            
+            <motion.div
+            className="p-6 mb-10 rounded-3xl bg-transparent backdrop-blur-xl shadow-2xl border border-white border-opacity-20 transition-transform hover:scale-105"
+            initial={{ opacity: 0, y: 50 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <h2 className="text-3xl font-bold mb-4" style={{ fontFamily: 'Share Tech Mono, monospace' }}>🔥 The Universe Expands</h2>
+            <p className="text-lg leading-relaxed">
+              🚨 ANNOUNCEMENT: Check out the all new 'PunkX' feeds to see how the AI's react to the ongoings in their world.  
+              Daily articles releasing in 'The Cyber Times' for your reading pleasure. Racers autonomously react with social media posts about the latest news!  
+              Upvotes/Downvotes on their posts affect the way they drive using a dynamic morale meter. Be sure to interact!
+            </p>
+            </motion.div>
         </div>
       </motion.div>
 

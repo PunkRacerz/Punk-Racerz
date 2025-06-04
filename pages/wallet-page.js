@@ -1,4 +1,3 @@
-// pages/wallet-page.js
 import dynamic from 'next/dynamic';
 import { useEffect, useState } from 'react';
 import { useWallet } from '@solana/wallet-adapter-react';
@@ -21,31 +20,36 @@ function WalletPageContent() {
   const wallet = useWallet();
   const [tokens, setTokens] = useState(0);
   const [betHistory, setBetHistory] = useState([]);
+  const [singleBet, setSingleBet] = useState(null);
 
   useEffect(() => {
     if (wallet?.publicKey) {
       const storedTokens = localStorage.getItem(`tokens-${wallet.publicKey}`);
       const storedBets = localStorage.getItem(`bets-${wallet.publicKey}`);
-
+      const storedSingle = localStorage.getItem('punkxBet');
+  
       if (storedTokens) setTokens(Number(storedTokens));
       if (storedBets) setBetHistory(JSON.parse(storedBets));
+      if (storedSingle) setSingleBet(JSON.parse(storedSingle));
     } else {
       setTokens(0);
       setBetHistory([]);
+      setSingleBet(null);
     }
   }, [wallet?.publicKey]);
-
+  
   return (
-    <div className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-8" style={{ backgroundImage: "url('/background.png')" }}>
+    <div className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-0" style={{ backgroundImage: "url('/background2.png')" }}>
       {/* Menu */}
-      <div className="fixed top-6 left-6 flex flex-col w-fit z-50 bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 space-y-2">
-        <Link href="/" className="menu-link">🏁 Home</Link>
-        <Link href="/your-racerz" className="menu-link">🎮 Inventory</Link>
-        <Link href="/weather-forecast" className="menu-link">⛈ Weather</Link>
-        <Link href="/interactions" className="menu-link">🤖 Interact</Link>
-        <Link href="/wallet-page" className="menu-link">💰 Wallet</Link>
-        <Link href="/weekly-messages" className="menu-link">📈 Weekly Announcements</Link>
-        <Link href="/race-simulator" className="menu-link">🎮 Race Simulator</Link>
+      <div className="w-full p-4 bg-black/30 backdrop-blur-md text-white flex justify-center gap-6 text-sm font-medium border-b border-pink-500 shadow-md">
+        <Link href="/">🏁 Home</Link>
+        <Link href="/your-racerz">🎮 Inventory</Link>
+        <Link href="/punkx">PunkX</Link>
+        <Link href="/weather-forecast">⛈ Weather</Link>
+        <Link href="/interactions">🤖 Interact</Link>
+        <Link href="/wallet-page">💰 Wallet</Link>
+        <Link href="/weekly-messages">📈 Weekly Announcements</Link>
+        <Link href="/race-simulator">🎮 Race Simulator</Link>
       </div>
 
       {/* Page Content */}
@@ -61,6 +65,18 @@ function WalletPageContent() {
       <div className="text-center mb-6 text-lg">
         <p><strong>Wallet Address:</strong> {wallet?.publicKey?.toBase58() || 'Not Connected'}</p>
         <p><strong>$PUNK Tokens:</strong> {tokens}</p>
+      </div>
+
+      <div className="mt-10 text-center">
+        <h2 className="text-2xl font-bold mb-4">🎯 Current Active Bet</h2>
+        {singleBet ? (
+          <div className="bg-pink-900 bg-opacity-50 p-4 rounded-xl inline-block text-white">
+            <p>You have bet <strong>{singleBet.amount.toLocaleString()} $PUNK</strong> on:</p>
+            <p className="text-green-400 font-bold text-lg mt-2">{singleBet.racer}</p>
+          </div>
+        ) : (
+          <p className="text-gray-400">No active bet recorded.</p>
+        )}
       </div>
 
       <div className="mt-10 text-center">
@@ -104,4 +120,3 @@ export default function WalletPage() {
     </ConnectionProvider>
   );
 }
-

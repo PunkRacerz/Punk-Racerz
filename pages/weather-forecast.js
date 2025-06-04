@@ -64,11 +64,11 @@ const weatherAnimations = {
   "Fire Fog": '🔥',
 };
 
-export default function WeatherForecast() {
+export default function WeatherForecast({ weatherAnimations: animationsProp = weatherAnimations, weatherEffects: effectsProp = weatherEffects }) {
   return (
-    <div className="min-h-screen bg-cover bg-center text-white font-sans px-6 py-8 relative overflow-hidden" style={{ backgroundImage: "url('/background.png')" }}>
+    <div className="min-h-screen w-full bg-cover bg-center text-white font-sans px-6 py-8 relative overflow-hidden" style={{ backgroundImage: "url('/background2.png')" }}>
       {/* Weather Particles */}
-      {Object.entries(weatherAnimations).map(([weather, icon]) => (
+      {Object.entries(animationsProp).map(([weather, icon]) => (
         <div key={weather} className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
           {[...Array(20)].map((_, i) => (
             <motion.div
@@ -90,18 +90,21 @@ export default function WeatherForecast() {
       ))}
 
       {/* Navigation Menu */}
-      <div className="fixed top-6 left-6 flex flex-col w-fit z-50 bg-white/10 backdrop-blur-lg rounded-xl p-4 border border-white/20 space-y-2">
-  <Link href="/your-racerz" className="menu-link">🎮 Your Racerz</Link>
-  <Link href="/" className="menu-link">🏁 Shop</Link>
-  <Link href="/weather-forecast" className="menu-link">⛈ Weather</Link>
-  <Link href="/interactions" className="menu-link">🤖 Interact</Link>
-  <Link href="/wallet-page" className="menu-link">💰 Wallet</Link>
-  <Link href="/weekly-messages" className="menu-link">📈 Weekly Announcements</Link>
-  <Link href="/race-simulator" className="menu-link">🎮 Race Simulator</Link>
-  </div>
+      <div className="fixed top-0 left-0 w-full z-50 bg-black/40 backdrop-blur-md text-white flex justify-between items-center px-8 py-3 text-sm font-medium border-b border-pink-500 shadow-md">
+        <div className="flex gap-6 flex-wrap justify-center w-full">
+          <Link href="/" className="hover:underline">🏁 Home</Link>
+          <Link href="/your-racerz" className="hover:underline">🎮 Inventory</Link>
+          <Link href="/punkx" className="hover:underline">PunkX</Link>
+          <Link href="/weather-forecast" className="hover:underline">⛈ Weather</Link>
+          <Link href="/interactions" className="hover:underline">🤖 Interact</Link>
+          <Link href="/wallet-page" className="hover:underline">💰 Wallet</Link>
+          <Link href="/weekly-messages" className="hover:underline">📈 Weekly Announcements</Link>
+          <Link href="/race-simulator" className="hover:underline">🎮 Race Simulator</Link>
+        </div>
+      </div>
 
       {/* Forecast Content */}
-      <motion.div className="relative z-10"
+      <motion.div className="relative z-10 pt-32"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 1 }}
@@ -110,7 +113,7 @@ export default function WeatherForecast() {
           ☁️ Weather Forecast Channel
         </h1>
 
-        {Object.entries(weatherEffects).map(([weather, racers]) => (
+        {Object.entries(effectsProp).map(([weather, racers]) => (
           <motion.div
             key={weather}
             className="text-center p-8 rounded-3xl bg-transparent backdrop-blur-xl shadow-2xl mx-auto max-w-3xl mb-20 border border-white border-opacity-20 transition-transform duration-300 hover:scale-[1.01]"
@@ -124,8 +127,7 @@ export default function WeatherForecast() {
               {weather}
             </h2>
             <p className="mt-4 text-base italic text-white max-w-xl mx-auto">
-              {/* Fun dynamic text based on weather */}
-              {weather === 'Super Snow' && 'The sky vomits snowman heads. Blizzard.EXE must be \"frustrated\" again.'}
+              {weather === 'Super Snow' && 'The sky vomits snowman heads. Blizzard.EXE must be "frustrated" again.'}
               {weather === 'Rabbit Rain' && 'Rabbits fall from the sky. Total bunny chaos. Blame GlitchFang.'}
               {weather === 'Fire Fog' && 'ScrapDrift is hotboxing the track. Visibility: optional.'}
             </p>
@@ -164,3 +166,4 @@ export default function WeatherForecast() {
     </div>
   );
 }
+

@@ -19,12 +19,17 @@ const MAX_INVENTORY = 5;
 const INITIAL_TOKENS = 40;
 
 export default function CharacterShop() {
+  const BET_AMOUNT = 25000;
+  const [selectedRacer, setSelectedRacer] = useState(null);
+  const [betPlaced, setBetPlaced] = useState(false);
   const { publicKey } = useWallet();
   const address = publicKey?.toBase58();
   const [tokens, setTokens] = useState(0);
   const [inventory, setInventory] = useState([]);
 
   useEffect(() => {
+    const storedBet = localStorage.getItem('punkxBet');
+    if (storedBet) setBetPlaced(true);
     if (address) {
       const tokenKey = `tokens-${address}`;
       const inventoryKey = `inventory-${address}`;
@@ -50,6 +55,13 @@ export default function CharacterShop() {
   }, [address]);
 
   const handleBuy = (racer) => {
+    if (betPlaced) return alert('You already placed a bet.');
+    localStorage.setItem('punkxBet', JSON.stringify({ racer, amount: BET_AMOUNT }));
+    setSelectedRacer(racer);
+    setBetPlaced(true);
+  };
+
+  const handleCharacterBuy = (racer) => {
     if (tokens < RACER_COST) return alert("Not enough $PUNK.");
     if (inventory.includes(racer)) return alert("You already own this character.");
     if (inventory.length >= MAX_INVENTORY) return alert("Inventory full. Max 5 characters.");
@@ -71,6 +83,7 @@ export default function CharacterShop() {
       <Link href="/" className="menu-link">🏁 Home</Link>
   <Link href="/your-racerz" className="menu-link">🎮 Inventory</Link>
   <Link href="/punkx">PunkX</Link>
+  <Link href="/the-cyber-times" className="menu-link"> Newz Feed</Link>
   <Link href="/weather-forecast" className="menu-link">⛈ Weather</Link>
   <Link href="/interactions" className="menu-link">🤖 Interact</Link>
   <Link href="/wallet-page" className="menu-link">💰 Wallet</Link>
@@ -100,15 +113,40 @@ export default function CharacterShop() {
                 />
                 <h2 className="mt-2 font-semibold text-lg">{racer}</h2>
                 <button
-                  onClick={() => handleBuy(racer)}
-                  disabled={alreadyOwned}
-                  className={`mt-4 px-4 py-2 rounded text-sm font-bold ${alreadyOwned ? 'bg-gray-600 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'}`}
-                >
-                  {alreadyOwned ? 'Owned' : `Buy for ${RACER_COST} $PUNK`}
-                </button>
+  onClick={() => handleCharacterBuy(racer)}
+  disabled={alreadyOwned}
+  className={`mt-4 px-4 py-2 rounded text-sm font-bold ${alreadyOwned ? 'bg-gray-600 cursor-not-allowed' : 'bg-purple-600 hover:bg-purple-700'}`}
+>
+  {alreadyOwned ? 'Owned' : `Buy for ${RACER_COST} $PUNK`}
+</button>
+{!betPlaced && (
+  <button
+    onClick={() => handleBuy(racer)}
+    className="mt-2 w-full bg-pink-600 hover:bg-pink-700 py-1 text-sm rounded font-bold"
+  >
+    Bet 25,000 $PUNK
+  </button>
+)}
+{betPlaced && selectedRacer === racer && (
+  <div className="mt-2 text-green-400 text-sm font-semibold">✅ Bet Placed</div>
+)}
               </div>
             );
           })}
+        </div>
+
+        <h2 className="text-3xl text-center mt-16 font-bold text-white">🛒 Item Shop</h2>
+        <div className="flex justify-center mt-6">
+          <div className="bg-white/10 backdrop-blur-lg border border-white/20 rounded-xl p-6 w-80 text-center text-white">
+            <Image src="/grimmcrate.png" alt="GrimmCrate" width={200} height={200} className="mx-auto rounded mb-4" />
+            <h3 className="text-lg font-bold mb-2">GrimmCrate</h3>
+            <button
+              onClick={() => alert('GrimmCrate purchased! (Utility coming soon)')}
+              className="bg-pink-600 hover:bg-pink-700 text-white py-2 px-4 rounded"
+            >
+              Buy
+            </button>
+          </div>
         </div>
 
         <div className="flex justify-center items-center gap-10 mt-10">

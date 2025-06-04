@@ -226,7 +226,7 @@ localStorage.setItem(`opened-box-${address}`, 'true');
           <div className="inventory-slot" key={idx}>
             {inventory[idx] && (
               <img
-                src={`/racers/${inventory[idx].toLowerCase().replace(/[ .]/g, '-')}.png`}
+              src={`/racers/${inventory[idx] === 'Blizzard.EXE' ? 'blizzard.png' : inventory[idx] === 'Eclipse.9' ? 'eclipse9.png' : inventory[idx].toLowerCase().replace(/[ .]/g, '-') + '.png'}`}
                 alt={inventory[idx]}
                 className="inventory-image"
               />
@@ -343,6 +343,7 @@ localStorage.setItem(`opened-box-${address}`, 'true');
         .backstory {
           font-size: 1rem;
           white-space: pre-wrap;
+          color: white;
         }
 
         .weather-stats {
